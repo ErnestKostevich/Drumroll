@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { sanitizeCopy, type CopyOutput } from "@/lib/copy-gen";
+import { ipFrom, limit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,20 @@ function extractJson(text: string): unknown {
 }
 
 export async function POST(req: Request) {
+  const ip = ipFrom(req.headers);
+  const gate = limit(`ai:${ip}`, 30, 60 * 60 * 1000);
+  if (!gate.ok) {
+    return Response.json(
+      { error: "AI generation rate limit reached (30/hour per IP). Try again later." },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(Math.ceil((gate.resetAt - Date.now()) / 1000)),
+        },
+      },
+    );
+  }
+
   const apiKey = req.headers.get("x-anthropic-key")?.trim();
   if (!apiKey || !apiKey.startsWith("sk-ant-")) {
     return Response.json(

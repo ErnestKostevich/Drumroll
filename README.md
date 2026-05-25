@@ -93,7 +93,10 @@ Try the flow:
 3. Get redirected to `/w/[your-slug]?owner=1` — the owner sees a banner with the shareable URL
 4. Open the same URL in incognito → that's what visitors see
 5. Submit an email → see your position + referral link
-6. Visit `/dashboard` → see all your waitlists with signup counts
+6. Visit `/dashboard` → see **your** waitlists (scoped by the `wk_owner` cookie set on creation)
+7. Click **Edit** to refine copy, set a webhook URL, or change the accent glyph
+8. Click **Export signups (CSV)** in the danger zone to download a CSV
+9. Hit the Hobby limit on a 2nd waitlist → see the upgrade card → click **Upgrade to Pro** → dev-mode flips your plan immediately
 
 ### How AI copy works (BYOK)
 
@@ -110,11 +113,14 @@ You can also self-host with a server-side key for personal use: set `ANTHROPIC_A
 |------|---------------------|
 | ~~In-memory store~~ ✅ **libSQL + Drizzle** | Add Turso for prod (1 env var) |
 | ~~Template copy only~~ ✅ **BYOK Claude API + template fallback** | – |
-| No auth | Clerk, Lucia, or magic-link via Resend |
-| No billing | Stripe Checkout + Customer Portal |
+| ~~Mock dashboard / shared with anyone~~ ✅ **Cookie-scoped ownership** | Upgrade to real magic-link auth if you want multi-device |
+| ~~No plan limits~~ ✅ **Hobby: 1 wl / 500 signups · Pro: 50 / 25k · Team: 200 / 250k** | – |
+| ~~No billing flow~~ ✅ **Stripe Checkout scaffold + webhook handler + dev-mode self-upgrade** | `npm i stripe`, set `STRIPE_SECRET_KEY` + price IDs |
+| ~~No edit/delete~~ ✅ **/dashboard/[slug]/edit + Danger zone delete + CSV export** | – |
+| ~~No rate limiting~~ ✅ **IP-based: 30 AI/hr, 10 creates/hr, 60 joins/min per waitlist** | Move to Upstash Redis if you scale past one Vercel region |
+| ~~No webhooks~~ ✅ **Per-waitlist webhook URL fired on signup** | – |
 | No email | Resend (welcome email + launch blast) |
-| Mock owner dashboard stats | Real aggregations from DB |
-| Anyone can see any waitlist on /dashboard | Wire to authed user once auth lands |
+| No magic-link auth | Cookie ownership is fine for first 100 customers |
 
 ## Deploy to Vercel
 
