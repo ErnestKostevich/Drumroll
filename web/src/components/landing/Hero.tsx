@@ -16,7 +16,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/60 px-3 py-1 font-mono text-xs text-muted-strong transition hover:border-brand/50 hover:text-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-            v0.1 — now in public beta
+            v0.0.1 — now in public beta
           </Link>
 
           <h1 className="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
