@@ -1,30 +1,45 @@
 # WaitlistKit
 
-> Beautiful waitlists for AI startups. AI-generated copy. Viral referrals. Real analytics. Live in 60 seconds.
+> Beautiful waitlists for AI startups. Bring-your-own-key AI. Viral referrals. Real analytics. Live in 60 seconds.
 
-A purpose-built waitlist product for AI startup founders. Stop losing signups to ugly waitlist pages from 2018.
+A purpose-built waitlist product for AI startup founders, built on a **zero-cost-to-operator** model: users bring their own Anthropic key, you (the operator) pay nothing per generation, all infra runs on free tiers up to thousands of users.
 
 **Live demo:** run locally and visit `/w/lumen-ai`
-**Status:** v0.1 — public beta. MVP scaffolding shipped.
+**Status:** v0.3 — public beta. BYOK live, deployable to Vercel + Turso for $0.
 **Dev by:** Ernest Kostevich
 
 ---
 
 ## What it does
 
-- **AI-generated landing copy** — type a product name and one sentence, get a full waitlist page with hero, CTA, perks, and OG image.
+- **Bring-your-own-key AI copy** — paste your Anthropic key once (stored in localStorage), get tagline + perks + CTAs in your product's voice. Without a key, a clean template generator kicks in — the waitlist still ships.
 - **Viral referral loops** — every signup gets a personal share link. Friends joining bumps them up the queue.
 - **Conversion-tuned templates** — dark UI built for 2026 launches, mobile-first, fast.
+- **Dynamic OG images** — every waitlist gets its own auto-rendered share preview.
 - **Real analytics** — signups, top referrers, conversion rate. No third-party scripts.
 - **Owner dashboard** — manage all your waitlists in one place.
+
+## Why zero-cost for the operator
+
+| Component | Free tier | Cost per user to operator |
+|-----------|-----------|---------------------------|
+| Vercel hosting | 100GB bandwidth + 100GB-hr compute | $0 (room for ~1M page views) |
+| Turso libSQL | 500MB + 1B reads/mo | $0 |
+| Claude API | n/a — **users pay Anthropic directly** | **$0** |
+| Email (future) | Resend / SendGrid free tier | $0 until ~3k emails/mo |
+| Total fixed cost | | **$0/mo** |
+
+Customers pay $19-49/mo for the hosting platform, branding, custom domain, referral mechanics, and dashboard. AI tokens are passed through directly to Anthropic — no markup, no caps.
 
 ## Pricing (target)
 
 | Plan | Price | What you get |
 |------|-------|--------------|
-| Hobby | $0 | 1 waitlist, 500 signups, WaitlistKit branding |
-| Pro | $29 / mo | Unlimited waitlists, 25k signups, custom domain, AI copy |
-| Team | $99 / mo | Pro + 250k signups, 5 seats, white-label, API access |
+| Hobby | $0 | 1 waitlist, 500 signups, template copy, WaitlistKit subdomain |
+| Pro | $19 / mo | Unlimited waitlists, 25k signups, custom domain, BYOK AI |
+| Team | $49 / mo | Pro + 250k signups, 5 seats, white-label, API access |
+
+AI generation = users bring their own Anthropic key, pay Anthropic directly (~$0.005-0.01 per waitlist).
 
 ## Tech stack
 
@@ -80,21 +95,21 @@ Try the flow:
 5. Submit an email → see your position + referral link
 6. Visit `/dashboard` → see all your waitlists with signup counts
 
-### Optional: real AI copy
+### How AI copy works (BYOK)
 
-```bash
-# in web/.env.local
-ANTHROPIC_API_KEY=sk-ant-...
-```
+1. Open the create form, click **"✨ Connect key"** in the top-right of the form.
+2. Paste an Anthropic key from [console.anthropic.com](https://console.anthropic.com/settings/keys). It's stored only in your browser's localStorage.
+3. Click **"✨ Generate with AI"**. The browser POSTs to `/api/ai/generate` with your key in an `x-anthropic-key` header. The route proxies to Anthropic, returns JSON copy, and never logs the key.
+4. Preview appears in-form. Click **Launch** to create the waitlist with that copy.
 
-With a key set, `createWaitlist` calls Claude (Sonnet 4.6 by default) to generate the tagline, perks, and CTA. Without it, the deterministic template kicks in — the rest of the flow is identical.
+You can also self-host with a server-side key for personal use: set `ANTHROPIC_API_KEY` in `.env.local` and modify `/api/ai/generate/route.ts` to fall back to it (a few lines).
 
 ## What's still stubbed
 
 | Stub | Real implementation |
 |------|---------------------|
 | ~~In-memory store~~ ✅ **libSQL + Drizzle** | Add Turso for prod (1 env var) |
-| ~~Template copy~~ ✅ **Claude API (with fallback)** | – |
+| ~~Template copy only~~ ✅ **BYOK Claude API + template fallback** | – |
 | No auth | Clerk, Lucia, or magic-link via Resend |
 | No billing | Stripe Checkout + Customer Portal |
 | No email | Resend (welcome email + launch blast) |

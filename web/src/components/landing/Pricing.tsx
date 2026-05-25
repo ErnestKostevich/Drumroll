@@ -12,14 +12,15 @@ const plans = [
     features: [
       "1 waitlist",
       "Up to 500 signups",
-      "WaitlistKit branding",
+      "Template-generated copy",
+      "WaitlistKit subdomain",
+      "Viral referrals built-in",
       "CSV export",
-      "Basic analytics",
     ],
   },
   {
     name: "Pro",
-    price: "$29",
+    price: "$19",
     cadence: "/ month",
     tagline: "For serious launches.",
     cta: "Start 14-day free trial",
@@ -29,15 +30,14 @@ const plans = [
       "Unlimited waitlists",
       "Up to 25,000 signups",
       "Custom domain + your branding",
-      "AI copy generation",
-      "Viral referrals + rewards",
+      "AI copy (bring your own Anthropic key)",
       "Webhooks + email integrations",
       "Priority support",
     ],
   },
   {
     name: "Team",
-    price: "$99",
+    price: "$49",
     cadence: "/ month",
     tagline: "Built for AI startups with traction.",
     cta: "Talk to us",
@@ -47,9 +47,9 @@ const plans = [
       "Everything in Pro",
       "Up to 250,000 signups",
       "5 team members",
-      "Custom SLA + dedicated Slack",
       "White-label embeds",
       "API access",
+      "Custom SLA + dedicated Slack",
     ],
   },
 ];
@@ -63,11 +63,12 @@ export function Pricing() {
             Pricing
           </p>
           <h2 className="mt-3 text-balance text-4xl font-semibold tracking-tight md:text-5xl">
-            Simple pricing. Cancel anytime.
+            Honest pricing. No token caps.
           </h2>
           <p className="mt-4 text-muted-strong">
-            Start free. Upgrade when you need branding, your own domain, or
-            more than 500 signups.
+            We don&apos;t markup AI tokens. Bring your own Anthropic key and pay
+            them direct — your AI cost stays predictable, ours stays at zero,
+            and you stay in control.
           </p>
         </div>
 
@@ -127,7 +128,8 @@ export function Pricing() {
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-muted">
           Plans launch with public-beta pricing. Lifetime discount for the first
-          500 paying customers.
+          500 paying customers. AI generation typically costs &lt;$0.01 per
+          waitlist on Anthropic&apos;s side.
         </p>
       </div>
     </section>

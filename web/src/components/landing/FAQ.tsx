@@ -1,7 +1,15 @@
 const faqs = [
   {
     q: "Do I need to know how to code?",
-    a: "Nope. You type a product name and one sentence. WaitlistKit generates the page, the copy, the OG image, and the referral mechanics for you.",
+    a: "Nope. You type a product name and one sentence. WaitlistKit generates the page and the referral mechanics for you.",
+  },
+  {
+    q: "Why do I bring my own Anthropic API key?",
+    a: "Two reasons. (1) Your token cost goes straight to Anthropic — typically less than a cent per waitlist — instead of us marking it up 5x like most AI products. (2) Your usage stays in your control: pause it, swap models, switch providers later, no lock-in. The key lives only in your browser; we proxy each call without ever logging it.",
+  },
+  {
+    q: "Can I use it without an API key?",
+    a: "Yes. Without a key, copy comes from a clean template generator — still hosts a beautiful waitlist, just without the AI polish. Add a key anytime to upgrade existing waitlists.",
   },
   {
     q: "Can I use my own domain?",
@@ -13,11 +21,7 @@ const faqs = [
   },
   {
     q: "Where is my data stored?",
-    a: "Postgres on Supabase. You can export to CSV any time, and Pro+ plans have webhooks + direct integrations with Resend, ConvertKit, and Loops.",
-  },
-  {
-    q: "Can I bring my own LLM API key?",
-    a: "Yes. Hobby plan uses our shared model with rate limits. Pro+ lets you wire in your own Claude / OpenAI key for unlimited generations and lower latency.",
+    a: "Turso (managed libSQL) in production, or local SQLite if you self-host. You can export to CSV any time, and Pro+ plans have webhooks + direct integrations with Resend, ConvertKit, and Loops.",
   },
   {
     q: "Is there a refund?",

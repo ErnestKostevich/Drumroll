@@ -11,7 +11,7 @@ import {
   slugExists,
   totalSignups,
 } from "@/lib/store";
-import { generateCopy } from "@/lib/copy-gen";
+import { generateCopy, sanitizeCopy, type CopyOutput } from "@/lib/copy-gen";
 import { toSlug, randomSuffix } from "@/lib/slug";
 
 export type CreateState = {
@@ -25,6 +25,39 @@ export type JoinState = {
   total?: number;
   email?: string;
 };
+
+function parseSubmittedCopy(formData: FormData): CopyOutput | null {
+  const tagline = formData.get("tagline");
+  const longDescription = formData.get("longDescription");
+  const ctaLabel = formData.get("ctaLabel");
+  const accentEmoji = formData.get("accentEmoji");
+  const perksRaw = formData.get("perks");
+
+  if (
+    typeof tagline !== "string" ||
+    typeof longDescription !== "string" ||
+    typeof ctaLabel !== "string" ||
+    typeof accentEmoji !== "string" ||
+    typeof perksRaw !== "string"
+  ) {
+    return null;
+  }
+
+  let perks: unknown;
+  try {
+    perks = JSON.parse(perksRaw);
+  } catch {
+    return null;
+  }
+
+  return sanitizeCopy({
+    tagline,
+    longDescription,
+    ctaLabel,
+    accentEmoji,
+    perks,
+  });
+}
 
 export async function createWaitlist(
   _prev: CreateState,
@@ -40,7 +73,8 @@ export async function createWaitlist(
     return { error: "Give us at least one sentence about what you're building." };
   }
 
-  const copy = await generateCopy({ productName, description });
+  const copy =
+    parseSubmittedCopy(formData) ?? generateCopy({ productName, description });
 
   let slug = toSlug(productName) || "launch";
   while (await slugExists(slug)) {
