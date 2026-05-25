@@ -67,6 +67,21 @@ export function Footer() {
                 GitHub
               </a>
             </li>
+            <li>
+              <Link href="/legal/privacy" className="text-muted-strong transition hover:text-foreground">
+                Privacy
+              </Link>
+            </li>
+            <li>
+              <Link href="/legal/terms" className="text-muted-strong transition hover:text-foreground">
+                Terms
+              </Link>
+            </li>
+            <li>
+              <Link href="/legal/refund" className="text-muted-strong transition hover:text-foreground">
+                Refund
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

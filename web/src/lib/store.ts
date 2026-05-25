@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, sql } from "drizzle-orm";
 import { db, ensureSchema } from "./db/client";
 import {
   waitlists,
@@ -48,6 +48,23 @@ export async function positionFor(
   const list = await listSignups(slug);
   const idx = list.findIndex((s) => s.email === email);
   return idx === -1 ? null : idx + 1;
+}
+
+export async function topReferrers(slug: string, n = 3): Promise<Signup[]> {
+  await ensureSchema();
+  return db
+    .select()
+    .from(signups)
+    .where(and(eq(signups.waitlistSlug, slug), gt(signups.referrals, 0)))
+    .orderBy(desc(signups.referrals), asc(signups.joinedAt))
+    .limit(n);
+}
+
+export function maskEmail(email: string): string {
+  const [user, domain] = email.split("@");
+  if (!user || !domain) return email;
+  if (user.length <= 2) return `${user[0] ?? ""}•@${domain}`;
+  return `${user.slice(0, 2)}${"•".repeat(Math.min(user.length - 2, 4))}@${domain}`;
 }
 
 export async function listWaitlistsForOwner(ownerId: string): Promise<Waitlist[]> {

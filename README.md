@@ -113,12 +113,18 @@ You can also self-host with a server-side key for personal use: set `ANTHROPIC_A
 |------|---------------------|
 | ~~In-memory store~~ ✅ **libSQL + Drizzle** | Add Turso for prod (1 env var) |
 | ~~Template copy only~~ ✅ **BYOK Claude API + template fallback** | – |
-| ~~Mock dashboard / shared with anyone~~ ✅ **Cookie-scoped ownership** | Upgrade to real magic-link auth if you want multi-device |
+| ~~Mock dashboard / shared with anyone~~ ✅ **Cookie-scoped ownership** | Upgrade to magic-link auth if you want multi-device |
 | ~~No plan limits~~ ✅ **Hobby: 1 wl / 500 signups · Pro: 50 / 25k · Team: 200 / 250k** | – |
-| ~~No billing flow~~ ✅ **Stripe Checkout scaffold + webhook handler + dev-mode self-upgrade** | `npm i stripe`, set `STRIPE_SECRET_KEY` + price IDs |
+| ~~No billing flow~~ ✅ **Stripe Checkout scaffold + webhook handler + dev-mode self-upgrade** | Set `STRIPE_SECRET_KEY` + price IDs |
 | ~~No edit/delete~~ ✅ **/dashboard/[slug]/edit + Danger zone delete + CSV export** | – |
-| ~~No rate limiting~~ ✅ **IP-based: 30 AI/hr, 10 creates/hr, 60 joins/min per waitlist** | Move to Upstash Redis if you scale past one Vercel region |
+| ~~No rate limiting~~ ✅ **IP-based: 30 AI/hr, 10 creates/hr, 60 joins/min/slug** | Upstash Redis if you scale past one Vercel region |
 | ~~No webhooks~~ ✅ **Per-waitlist webhook URL fired on signup** | – |
+| ~~No legal pages~~ ✅ **Privacy + Terms + Refund** at `/legal/*` | Tweak text for your jurisdiction before launch |
+| ~~No SEO basics~~ ✅ **robots.txt + sitemap.xml + per-route metadata** | – |
+| ~~No embed widget~~ ✅ **Drop-in `<script>` snippet on the edit page** + `/embed.js` runtime + CORS-enabled `/api/embed/signup` | – |
+| ~~No referral leaderboard~~ ✅ **Top 3 referrers shown on every waitlist page** | – |
+| ~~No cookie notice~~ ✅ **Minimal in-app banner (no third-party tracker disclosure needed)** | – |
+| ~~No error boundary~~ ✅ **Global `app/error.tsx` with retry + back-home** | – |
 | No email | Resend (welcome email + launch blast) |
 | No magic-link auth | Cookie ownership is fine for first 100 customers |
 

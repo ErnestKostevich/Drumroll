@@ -6,6 +6,7 @@ import { getWaitlist } from "@/lib/store";
 import { getCurrentOwner } from "@/lib/auth";
 import { EditWaitlistForm } from "./EditWaitlistForm";
 import { DangerZone } from "./DangerZone";
+import { EmbedSnippet } from "./EmbedSnippet";
 
 type Params = { slug: string };
 
@@ -46,6 +47,10 @@ export default async function EditWaitlistPage({
 
           <div className="mt-8">
             <EditWaitlistForm waitlist={wl} />
+          </div>
+
+          <div className="mt-8">
+            <EmbedSnippet slug={wl.slug} />
           </div>
 
           <div className="mt-12">

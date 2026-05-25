@@ -4,6 +4,8 @@ import Link from "next/link";
 import {
   ensureDemoSeed,
   getWaitlist,
+  maskEmail,
+  topReferrers,
   totalSignups,
 } from "@/lib/store";
 import { Logo } from "@/components/Logo";
@@ -47,6 +49,7 @@ export default async function WaitlistPage({
   if (!wl) notFound();
 
   const total = await totalSignups(slug);
+  const top = await topReferrers(slug, 3);
   const isOwner = search.owner === "1";
   const ref = search.ref ?? null;
 
@@ -105,6 +108,41 @@ export default async function WaitlistPage({
                 </div>
               ))}
             </div>
+
+            {top.length > 0 ? (
+              <div className="mx-auto mt-10 max-w-xl text-left">
+                <p className="font-mono text-xs uppercase tracking-widest text-brand">
+                  Top referrers
+                </p>
+                <ol className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface/40">
+                  {top.map((s, i) => (
+                    <li
+                      key={s.id}
+                      className="flex items-center gap-4 px-4 py-3 text-sm"
+                    >
+                      <span
+                        className={
+                          i === 0
+                            ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[#04140d] font-mono text-xs font-semibold"
+                            : "inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface text-muted-strong font-mono text-xs"
+                        }
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="flex-1 font-mono text-xs text-muted-strong">
+                        {maskEmail(s.email)}
+                      </span>
+                      <span className="font-mono text-xs text-brand">
+                        {s.referrals} invite{s.referrals === 1 ? "" : "s"}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-3 text-xs text-muted">
+                  Refer a friend — each signup bumps you up the queue.
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
       </main>
