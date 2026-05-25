@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #07090c;
+  --color-surface: #0d1117;
+  --color-surface-elevated: #11161e;
+  --color-border: #1d2533;
+  --color-border-strong: #2a3447;
+  --color-foreground: #f4f6fb;
+  --color-muted: #8a93a6;
+  --color-muted-strong: #c0c7d4;
+  --color-brand: #34d399;
+  --color-brand-strong: #10b981;
+  --color-brand-soft: rgba(52, 211, 153, 0.12);
+  --color-accent: #a78bfa;
+  --color-danger: #f87171;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: #04140d;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 70%);
+}
+
+.bg-radial-brand {
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(52, 211, 153, 0.18),
+    transparent 70%
+  );
+}
+
+.glow-brand {
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.18),
+    0 12px 40px -10px rgba(52, 211, 153, 0.35);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #f4f6fb 0%, #34d399 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}
