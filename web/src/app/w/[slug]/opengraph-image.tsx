@@ -8,14 +8,14 @@ export const alt = "Join the waitlist";
 export default async function OgImage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   await ensureDemoSeed();
-  const wl = await getWaitlist(params.slug);
+  const wl = await getWaitlist(slug);
 
   const productName = wl?.productName ?? "Untitled";
   const tagline = wl?.tagline ?? "Launching soon.";
-  const emoji = wl?.accentEmoji ?? "✦";
 
   return new ImageResponse(
     (
@@ -63,19 +63,25 @@ export default async function OgImage({
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
           <div
             style={{
-              fontSize: 56,
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              fontSize: 22,
+              fontFamily: "monospace",
               color: "#34d399",
-              lineHeight: 1,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
             }}
           >
-            {emoji}
+            <div style={{ width: 28, height: 2, background: "#34d399" }} />
+            Now in beta
           </div>
           <div
             style={{
-              fontSize: 96,
+              fontSize: 104,
               fontWeight: 600,
               letterSpacing: "-0.04em",
               lineHeight: 1.05,
@@ -86,7 +92,7 @@ export default async function OgImage({
           </div>
           <div
             style={{
-              fontSize: 36,
+              fontSize: 38,
               color: "#c0c7d4",
               lineHeight: 1.3,
               maxWidth: 980,
