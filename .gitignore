@@ -11,10 +11,11 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# Env files
+# Env files (real secrets only — .env.example is committed)
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Vercel
 .vercel
@@ -33,3 +34,9 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Local SQLite databases (Drizzle / libSQL)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

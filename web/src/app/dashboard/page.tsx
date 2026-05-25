@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { store, ensureDemoSeed } from "@/lib/store";
+import { ensureDemoSeed, listWaitlists, totalSignups } from "@/lib/store";
 
 export default async function DashboardPage() {
-  ensureDemoSeed();
-  const waitlists = Array.from(store.waitlists.values()).sort(
-    (a, b) => b.createdAt - a.createdAt,
+  await ensureDemoSeed();
+  const list = await listWaitlists();
+  const waitlists = [...list].sort((a, b) => b.createdAt - a.createdAt);
+
+  const counts = await Promise.all(
+    waitlists.map(async (w) => ({ slug: w.slug, count: await totalSignups(w.slug) })),
   );
+  const countMap = new Map(counts.map((c) => [c.slug, c.count]));
+  const grandTotal = counts.reduce((acc, c) => acc + c.count, 0);
 
   return (
     <>
@@ -51,7 +56,7 @@ export default async function DashboardPage() {
             ) : (
               <ul>
                 {waitlists.map((wl) => {
-                  const total = store.signups.get(wl.slug)?.length ?? 0;
+                  const total = countMap.get(wl.slug) ?? 0;
                   const isDemo = wl.slug === "lumen-ai";
                   return (
                     <li
@@ -104,7 +109,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <StatCard label="Total signups" value={String(totalAcross(waitlists.map((w) => w.slug)))} hint="across all waitlists" />
+            <StatCard label="Total signups" value={String(grandTotal)} hint="across all waitlists" />
             <StatCard label="Conversion (avg)" value="38%" hint="email submit rate" />
             <StatCard label="Top channel" value="X / Twitter" hint="from referrer logs" />
           </div>
@@ -112,13 +117,6 @@ export default async function DashboardPage() {
       </main>
       <Footer />
     </>
-  );
-}
-
-function totalAcross(slugs: string[]): number {
-  return slugs.reduce(
-    (acc, s) => acc + (store.signups.get(s)?.length ?? 0),
-    0,
   );
 }
 

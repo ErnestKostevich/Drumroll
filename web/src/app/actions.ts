@@ -2,7 +2,15 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { store, listSignups, positionFor } from "@/lib/store";
+import {
+  addSignup,
+  createWaitlistRow,
+  getWaitlist,
+  positionFor,
+  signupExists,
+  slugExists,
+  totalSignups,
+} from "@/lib/store";
 import { generateCopy } from "@/lib/copy-gen";
 import { toSlug, randomSuffix } from "@/lib/slug";
 
@@ -32,15 +40,14 @@ export async function createWaitlist(
     return { error: "Give us at least one sentence about what you're building." };
   }
 
-  const copy = generateCopy({ productName, description });
+  const copy = await generateCopy({ productName, description });
 
-  let slug = toSlug(productName);
-  if (!slug) slug = "launch";
-  while (store.waitlists.has(slug)) {
+  let slug = toSlug(productName) || "launch";
+  while (await slugExists(slug)) {
     slug = `${toSlug(productName) || "launch"}-${randomSuffix()}`;
   }
 
-  store.waitlists.set(slug, {
+  await createWaitlistRow({
     slug,
     productName,
     tagline: copy.tagline,
@@ -50,7 +57,6 @@ export async function createWaitlist(
     perks: copy.perks,
     createdAt: Date.now(),
   });
-  store.signups.set(slug, []);
 
   redirect(`/w/${slug}?owner=1`);
 }
@@ -60,37 +66,29 @@ export async function joinWaitlist(
   formData: FormData,
 ): Promise<JoinState> {
   const slug = String(formData.get("slug") ?? "");
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const referredBy = String(formData.get("ref") ?? "") || null;
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  const rawRef = String(formData.get("ref") ?? "");
+  const referredBy = rawRef.trim() || null;
 
-  if (!store.waitlists.has(slug)) {
+  if (!(await getWaitlist(slug))) {
     return { error: "This waitlist doesn't exist." };
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "That email doesn't look right." };
   }
 
-  const signups = listSignups(slug);
-  if (signups.some((s) => s.email === email)) {
-    const position = positionFor(slug, email) ?? signups.length;
-    return { position, total: signups.length, email };
+  if (await signupExists(slug, email)) {
+    const total = await totalSignups(slug);
+    const position = (await positionFor(slug, email)) ?? total;
+    return { position, total, email };
   }
 
-  signups.push({
-    email,
-    joinedAt: Date.now(),
-    referredBy,
-    referrals: 0,
-  });
-
-  if (referredBy) {
-    const referrer = signups.find((s) => s.email === referredBy);
-    if (referrer) referrer.referrals += 1;
-  }
-
-  store.signups.set(slug, signups);
+  await addSignup({ waitlistSlug: slug, email, referredBy });
   revalidatePath(`/w/${slug}`);
 
-  const position = positionFor(slug, email) ?? signups.length;
-  return { position, total: signups.length, email };
+  const total = await totalSignups(slug);
+  const position = (await positionFor(slug, email)) ?? total;
+  return { position, total, email };
 }

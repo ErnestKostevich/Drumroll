@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getWaitlist, listSignups, ensureDemoSeed } from "@/lib/store";
+import {
+  ensureDemoSeed,
+  getWaitlist,
+  totalSignups,
+} from "@/lib/store";
 import { Logo } from "@/components/Logo";
 import { JoinWaitlistForm } from "./JoinWaitlistForm";
 import { OwnerBanner } from "./OwnerBanner";
@@ -15,8 +19,8 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  ensureDemoSeed();
-  const wl = getWaitlist(slug);
+  await ensureDemoSeed();
+  const wl = await getWaitlist(slug);
   if (!wl) return { title: "Waitlist not found" };
   return {
     title: `${wl.productName} — join the waitlist`,
@@ -37,13 +41,12 @@ export default async function WaitlistPage({
 }) {
   const { slug } = await params;
   const search = await searchParams;
-  ensureDemoSeed();
+  await ensureDemoSeed();
 
-  const wl = getWaitlist(slug);
+  const wl = await getWaitlist(slug);
   if (!wl) notFound();
 
-  const signups = listSignups(slug);
-  const total = signups.length;
+  const total = await totalSignups(slug);
   const isOwner = search.owner === "1";
   const ref = search.ref ?? null;
 

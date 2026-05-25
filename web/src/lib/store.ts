@@ -1,59 +1,120 @@
 import "server-only";
+import { and, asc, eq, sql } from "drizzle-orm";
+import { db, ensureSchema } from "./db/client";
+import { waitlists, signups, type Waitlist, type Signup } from "./db/schema";
 
-export type Waitlist = {
-  slug: string;
-  productName: string;
-  tagline: string;
-  description: string;
-  ctaLabel: string;
-  accentEmoji: string;
-  perks: string[];
-  createdAt: number;
-};
+export type { Waitlist, Signup };
 
-export type Signup = {
+export async function getWaitlist(slug: string): Promise<Waitlist | undefined> {
+  await ensureSchema();
+  const rows = await db
+    .select()
+    .from(waitlists)
+    .where(eq(waitlists.slug, slug))
+    .limit(1);
+  return rows[0];
+}
+
+export async function listSignups(slug: string): Promise<Signup[]> {
+  await ensureSchema();
+  return db
+    .select()
+    .from(signups)
+    .where(eq(signups.waitlistSlug, slug))
+    .orderBy(asc(signups.joinedAt));
+}
+
+export async function totalSignups(slug: string): Promise<number> {
+  await ensureSchema();
+  const rows = await db
+    .select({ c: sql<number>`count(*)` })
+    .from(signups)
+    .where(eq(signups.waitlistSlug, slug));
+  return rows[0]?.c ?? 0;
+}
+
+export async function positionFor(
+  slug: string,
+  email: string,
+): Promise<number | null> {
+  await ensureSchema();
+  const list = await listSignups(slug);
+  const idx = list.findIndex((s) => s.email === email);
+  return idx === -1 ? null : idx + 1;
+}
+
+export async function listWaitlists(): Promise<Waitlist[]> {
+  await ensureSchema();
+  return db.select().from(waitlists).orderBy(asc(waitlists.createdAt));
+}
+
+export async function createWaitlistRow(row: Waitlist): Promise<void> {
+  await ensureSchema();
+  await db.insert(waitlists).values(row);
+}
+
+export async function slugExists(slug: string): Promise<boolean> {
+  await ensureSchema();
+  const rows = await db
+    .select({ s: waitlists.slug })
+    .from(waitlists)
+    .where(eq(waitlists.slug, slug))
+    .limit(1);
+  return rows.length > 0;
+}
+
+export async function addSignup(input: {
+  waitlistSlug: string;
   email: string;
-  joinedAt: number;
   referredBy: string | null;
-  referrals: number;
-};
-
-type Store = {
-  waitlists: Map<string, Waitlist>;
-  signups: Map<string, Signup[]>;
-};
-
-const globalForStore = globalThis as unknown as { __waitlistkitStore?: Store };
-
-export const store: Store =
-  globalForStore.__waitlistkitStore ??
-  (globalForStore.__waitlistkitStore = {
-    waitlists: new Map(),
-    signups: new Map(),
+}): Promise<void> {
+  await ensureSchema();
+  await db.insert(signups).values({
+    waitlistSlug: input.waitlistSlug,
+    email: input.email,
+    joinedAt: Date.now(),
+    referredBy: input.referredBy,
+    referrals: 0,
   });
 
-export function getWaitlist(slug: string): Waitlist | undefined {
-  return store.waitlists.get(slug);
+  if (input.referredBy) {
+    await db
+      .update(signups)
+      .set({ referrals: sql`${signups.referrals} + 1` })
+      .where(
+        and(
+          eq(signups.waitlistSlug, input.waitlistSlug),
+          eq(signups.email, input.referredBy),
+        ),
+      );
+  }
 }
 
-export function listSignups(slug: string): Signup[] {
-  return store.signups.get(slug) ?? [];
+export async function signupExists(
+  waitlistSlug: string,
+  email: string,
+): Promise<boolean> {
+  await ensureSchema();
+  const rows = await db
+    .select({ id: signups.id })
+    .from(signups)
+    .where(
+      and(eq(signups.waitlistSlug, waitlistSlug), eq(signups.email, email)),
+    )
+    .limit(1);
+  return rows.length > 0;
 }
 
-export function totalSignups(slug: string): number {
-  return listSignups(slug).length;
-}
+/**
+ * Seed a demo waitlist (Lumen AI) for first-run demos. Idempotent.
+ */
+export async function ensureDemoSeed(): Promise<void> {
+  await ensureSchema();
+  const exists = await slugExists("lumen-ai");
+  if (exists) return;
 
-export function positionFor(slug: string, email: string): number | null {
-  const list = listSignups(slug);
-  const idx = list.findIndex((s) => s.email === email);
-  if (idx === -1) return null;
-  return idx + 1;
-}
-
-export function ensureDemoSeed(): void {
-  if (store.waitlists.size > 0) return;
-  const demo: Waitlist = {
+  const now = Date.now();
+  await db.insert(waitlists).values({
     slug: "lumen-ai",
     productName: "Lumen AI",
     tagline: "The AI co-pilot that actually understands your codebase.",
@@ -66,25 +127,28 @@ export function ensureDemoSeed(): void {
       "Lifetime 30% off for the first 500 users",
       "Direct Slack channel with the founders",
     ],
-    createdAt: Date.now(),
-  };
-  store.waitlists.set(demo.slug, demo);
-  store.signups.set(demo.slug, [
+    createdAt: now,
+  });
+
+  await db.insert(signups).values([
     {
+      waitlistSlug: "lumen-ai",
       email: "founder@vercel.com",
-      joinedAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
+      joinedAt: now - 1000 * 60 * 60 * 24 * 3,
       referredBy: null,
       referrals: 4,
     },
     {
+      waitlistSlug: "lumen-ai",
       email: "sarah@linear.app",
-      joinedAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
+      joinedAt: now - 1000 * 60 * 60 * 24 * 2,
       referredBy: null,
       referrals: 2,
     },
     {
+      waitlistSlug: "lumen-ai",
       email: "tom@notion.so",
-      joinedAt: Date.now() - 1000 * 60 * 60 * 24,
+      joinedAt: now - 1000 * 60 * 60 * 24,
       referredBy: null,
       referrals: 1,
     },

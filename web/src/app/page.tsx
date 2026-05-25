@@ -8,8 +8,8 @@ import { FAQ } from "@/components/landing/FAQ";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { ensureDemoSeed } from "@/lib/store";
 
-export default function HomePage() {
-  ensureDemoSeed();
+export default async function HomePage() {
+  await ensureDemoSeed();
 
   return (
     <>
