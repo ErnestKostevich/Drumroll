@@ -57,15 +57,16 @@ export default async function OgImage({
               height: 40,
               borderRadius: 10,
               background: palette.brand,
-              color: palette.ink,
               display: "flex",
-              alignItems: "center",
+              flexDirection: "column",
+              gap: 3,
+              padding: "9px 7px",
               justifyContent: "center",
-              fontWeight: 700,
-              fontSize: 22,
             }}
           >
-            W
+            <div style={{ height: 5, background: palette.ink, borderRadius: 2.5, width: "100%" }} />
+            <div style={{ height: 5, background: palette.ink, opacity: 0.55, borderRadius: 2.5, width: "78%" }} />
+            <div style={{ height: 5, background: palette.ink, opacity: 0.3, borderRadius: 2.5, width: "55%" }} />
           </div>
           <div style={{ display: "flex" }}>
             Waitlist

@@ -18,7 +18,7 @@ import {
 } from "@/lib/store";
 import { generateCopy, sanitizeCopy, type CopyOutput } from "@/lib/copy-gen";
 import { toSlug, randomSuffix } from "@/lib/slug";
-import { getCurrentOwner, getOrCreateOwner } from "@/lib/auth";
+import { effectivePlan, getCurrentOwner, getOrCreateOwner } from "@/lib/auth";
 import { PLAN_LIMITS, ACCENT_PALETTE, type AccentColor } from "@/lib/db/schema";
 import { ipFrom, limit } from "@/lib/rate-limit";
 import { encrypt } from "@/lib/crypto";
@@ -103,11 +103,12 @@ export async function createWaitlist(
   }
 
   const owner = await getOrCreateOwner();
-  const limits = PLAN_LIMITS[owner.plan];
+  const plan = effectivePlan(owner);
+  const limits = PLAN_LIMITS[plan];
   const current = await countWaitlistsForOwner(owner.id);
   if (current >= limits.maxWaitlists) {
     return {
-      error: `${owner.plan === "hobby" ? "Hobby" : owner.plan} plan supports ${limits.maxWaitlists} waitlist${limits.maxWaitlists === 1 ? "" : "s"}. Upgrade to launch more.`,
+      error: `${plan === "hobby" ? "Hobby" : plan} plan supports ${limits.maxWaitlists} waitlist${limits.maxWaitlists === 1 ? "" : "s"}. Upgrade to launch more.`,
     };
   }
 
@@ -172,7 +173,7 @@ export async function joinWaitlist(
       await db.select().from(owners).where(eq(owners.id, wl.ownerId)).limit(1)
     )[0];
     if (ownerRow) {
-      const cap = PLAN_LIMITS[ownerRow.plan].maxSignupsPerWaitlist;
+      const cap = PLAN_LIMITS[effectivePlan(ownerRow)].maxSignupsPerWaitlist;
       const total = await totalSignups(slug);
       if (total >= cap) {
         return {

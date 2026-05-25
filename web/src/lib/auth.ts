@@ -69,8 +69,8 @@ export async function getOrCreateOwner(): Promise<Owner> {
 }
 
 /**
- * Replace the current owner's plan (used by Stripe webhook handler and the
- * dev-mode self-serve upgrade).
+ * Replace the current owner's plan (used by Stripe / NOWPayments webhook
+ * handlers and the dev-mode self-serve upgrade).
  */
 export async function setOwnerPlan(
   ownerId: string,
@@ -79,4 +79,19 @@ export async function setOwnerPlan(
 ): Promise<void> {
   await ensureSchema();
   await db.update(owners).set({ plan, ...patch }).where(eq(owners.id, ownerId));
+}
+
+/**
+ * The plan that should be enforced right now. If a paid plan was set but
+ * planRenewsAt is in the past (one-time NOWPayments invoice expired), we
+ * fall back to hobby. Stripe subscriptions get the same treatment by
+ * leaving planRenewsAt null and relying on Stripe webhooks to set the plan
+ * back to hobby on cancellation — so null renewal = unlimited (recurring).
+ */
+export function effectivePlan(owner: Pick<Owner, "plan" | "planRenewsAt">): Owner["plan"] {
+  if (owner.plan === "hobby") return "hobby";
+  if (owner.planRenewsAt === null || owner.planRenewsAt === undefined) {
+    return owner.plan; // recurring (Stripe) — no expiry
+  }
+  return owner.planRenewsAt > Date.now() ? owner.plan : "hobby";
 }

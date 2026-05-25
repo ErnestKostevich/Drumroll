@@ -11,17 +11,35 @@ export default function Icon() {
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           justifyContent: "center",
+          gap: 6,
+          padding: "14px 12px",
           background: "#34d399",
-          color: "#04140d",
-          fontSize: 44,
-          fontWeight: 700,
-          fontFamily: "system-ui, sans-serif",
           borderRadius: 14,
         }}
       >
-        W
+        <div style={{ display: "flex", height: 8, background: "#04140d", borderRadius: 4, width: "100%" }} />
+        <div
+          style={{
+            display: "flex",
+            height: 8,
+            background: "#04140d",
+            opacity: 0.55,
+            borderRadius: 4,
+            width: "78%",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            height: 8,
+            background: "#04140d",
+            opacity: 0.3,
+            borderRadius: 4,
+            width: "55%",
+          }}
+        />
       </div>
     ),
     { ...size },

@@ -9,7 +9,7 @@ import {
   signupsByDay,
   totalSignups,
 } from "@/lib/store";
-import { getCurrentOwner } from "@/lib/auth";
+import { effectivePlan, getCurrentOwner } from "@/lib/auth";
 import { ACCENT_PALETTE, PLAN_LIMITS, type AccentColor } from "@/lib/db/schema";
 
 type Row = {
@@ -47,13 +47,18 @@ export default async function DashboardPage() {
     0,
   );
 
-  const plan = owner?.plan ?? "hobby";
+  const plan = owner ? effectivePlan(owner) : "hobby";
   const limits = PLAN_LIMITS[plan];
   const planLabel = plan === "hobby" ? "Hobby" : plan === "pro" ? "Pro" : "Team";
   const planTone =
     plan === "hobby"
       ? "border-border-strong bg-surface text-muted-strong"
       : "border-brand/40 bg-brand-soft text-brand";
+  const renewsAt = owner?.planRenewsAt ?? null;
+  const daysRemaining =
+    renewsAt && plan !== "hobby"
+      ? Math.max(0, Math.ceil((renewsAt - Date.now()) / (24 * 60 * 60 * 1000)))
+      : null;
 
   return (
     <>
@@ -110,7 +115,15 @@ export default async function DashboardPage() {
               value={String(todayTotal)}
               hint={`${last7Total} in the last 7 days`}
             />
-            <StatCard label="Current plan" value={planLabel} hint={planHint(plan)} />
+            <StatCard
+              label="Current plan"
+              value={planLabel}
+              hint={
+                daysRemaining !== null
+                  ? `${planHint(plan)} · ${daysRemaining} day${daysRemaining === 1 ? "" : "s"} left`
+                  : planHint(plan)
+              }
+            />
           </div>
 
           {plan === "hobby" && waitlists.length >= 1 ? (

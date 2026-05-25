@@ -88,7 +88,7 @@ export function Footer() {
       <div className="border-t border-border/60">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 text-xs text-muted">
           <span>© {new Date().getFullYear()} WaitlistKit. Built for builders.</span>
-          <span className="font-mono">v0.1 · MVP</span>
+          <span className="font-mono">v0.0.1 · MVP</span>
         </div>
       </div>
     </footer>

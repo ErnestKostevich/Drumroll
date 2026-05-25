@@ -12,6 +12,7 @@ import { owners } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ipFrom, limit } from "@/lib/rate-limit";
 import { maybeSendWelcomeEmail } from "@/lib/email";
+import { effectivePlan } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
       await db.select().from(owners).where(eq(owners.id, wl.ownerId)).limit(1)
     )[0];
     if (ownerRow) {
-      const cap = PLAN_LIMITS[ownerRow.plan].maxSignupsPerWaitlist;
+      const cap = PLAN_LIMITS[effectivePlan(ownerRow)].maxSignupsPerWaitlist;
       const total = await totalSignups(slug);
       if (total >= cap) {
         return jsonCors(

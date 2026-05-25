@@ -36,15 +36,16 @@ export default function OgImage() {
               height: 44,
               borderRadius: 10,
               background: "#34d399",
-              color: "#04140d",
               display: "flex",
-              alignItems: "center",
+              flexDirection: "column",
+              gap: 4,
+              padding: "10px 8px",
               justifyContent: "center",
-              fontWeight: 700,
-              fontSize: 26,
             }}
           >
-            W
+            <div style={{ height: 6, background: "#04140d", borderRadius: 3, width: "100%" }} />
+            <div style={{ height: 6, background: "#04140d", opacity: 0.55, borderRadius: 3, width: "78%" }} />
+            <div style={{ height: 6, background: "#04140d", opacity: 0.3, borderRadius: 3, width: "55%" }} />
           </div>
           <div style={{ display: "flex" }}>
             Waitlist<span style={{ color: "#34d399", marginLeft: 2 }}>Kit</span>

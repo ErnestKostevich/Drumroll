@@ -1,0 +1,57 @@
+import { getOrCreateOwner, setOwnerPlan } from "@/lib/auth";
+import { createInvoice, PLAN_PRICE_USD } from "@/lib/nowpayments";
+
+export const runtime = "nodejs";
+
+type CheckoutBody = { plan?: "pro" | "team" };
+
+export async function POST(req: Request) {
+  let body: CheckoutBody;
+  try {
+    body = (await req.json()) as CheckoutBody;
+  } catch {
+    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const plan = body.plan;
+  if (plan !== "pro" && plan !== "team") {
+    return Response.json({ error: "Plan must be 'pro' or 'team'." }, { status: 400 });
+  }
+
+  const owner = await getOrCreateOwner();
+  const apiKey = process.env.NOWPAYMENTS_API_KEY;
+
+  if (!apiKey) {
+    // Dev mode: extend the cookie owner's plan for 30 days locally.
+    const renewsAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    await setOwnerPlan(owner.id, plan, { planRenewsAt: renewsAt });
+    return Response.json({
+      ok: true,
+      devMode: true,
+      message: `Upgraded to ${plan} until ${new Date(renewsAt).toISOString()} (dev mode — NOWPayments not configured).`,
+    });
+  }
+
+  const url = new URL(req.url);
+  const origin = url.origin;
+
+  // order_id encodes ownerId, plan, timestamp so the IPN webhook can parse
+  // it back without storing a separate mapping table.
+  const orderId = `${owner.id}|${plan}|${Date.now()}`;
+
+  const result = await createInvoice(apiKey, {
+    priceAmount: PLAN_PRICE_USD[plan],
+    priceCurrency: "usd",
+    orderId,
+    orderDescription: `WaitlistKit ${plan === "pro" ? "Pro" : "Team"} — 1 month`,
+    ipnCallbackUrl: `${origin}/api/billing/nowpayments/webhook`,
+    successUrl: `${origin}/dashboard?upgraded=1`,
+    cancelUrl: `${origin}/dashboard?upgrade=cancelled`,
+  });
+
+  if (!result.ok) {
+    return Response.json({ error: result.error }, { status: 502 });
+  }
+
+  return Response.json({ url: result.invoiceUrl, id: result.id });
+}

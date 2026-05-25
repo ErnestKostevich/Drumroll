@@ -24,6 +24,10 @@ const faqs = [
     a: "Turso (managed libSQL) in production, or local SQLite if you self-host. You can export to CSV any time, and Pro+ plans have webhooks + direct integrations with Resend, ConvertKit, and Loops.",
   },
   {
+    q: "How do I pay?",
+    a: "Crypto by default — Bitcoin, Ethereum, USDT and 300+ other coins via NOWPayments. Cards via Stripe coming soon. Sub-1% transaction fees mean more money to the founders, less to payment processors.",
+  },
+  {
     q: "Is there a refund?",
     a: "30-day no-questions-asked refund on Pro and Team. We don't want unhappy customers.",
   },
