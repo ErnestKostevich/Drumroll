@@ -44,7 +44,7 @@ export function CookieNotice() {
         <button
           type="button"
           onClick={dismiss}
-          className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-xs font-semibold text-[#04140d] transition hover:bg-brand-strong"
+          className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-xs font-semibold text-brand-ink transition hover:bg-brand-strong"
         >
           Got it
         </button>

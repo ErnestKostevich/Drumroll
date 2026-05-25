@@ -1,9 +1,18 @@
 import { ImageResponse } from "next/og";
 import { ensureDemoSeed, getWaitlist } from "@/lib/store";
+import { ACCENT_PALETTE } from "@/lib/db/schema";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Join the waitlist";
+
+function hexToRgba(hex: string, alpha: number): string {
+  const m = hex.replace("#", "");
+  const r = parseInt(m.slice(0, 2), 16);
+  const g = parseInt(m.slice(2, 4), 16);
+  const b = parseInt(m.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
 export default async function OgImage({
   params,
@@ -16,6 +25,7 @@ export default async function OgImage({
 
   const productName = wl?.productName ?? "Untitled";
   const tagline = wl?.tagline ?? "Launching soon.";
+  const palette = ACCENT_PALETTE[wl?.accentColor ?? "emerald"];
 
   return new ImageResponse(
     (
@@ -27,8 +37,7 @@ export default async function OgImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(52,211,153,0.22), transparent 70%), #07090c",
+          background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${hexToRgba(palette.brand, 0.22)}, transparent 70%), #07090c`,
           color: "#f4f6fb",
           fontFamily: "Geist, system-ui, sans-serif",
         }}
@@ -47,8 +56,8 @@ export default async function OgImage({
               width: 40,
               height: 40,
               borderRadius: 10,
-              background: "#34d399",
-              color: "#04140d",
+              background: palette.brand,
+              color: palette.ink,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -59,7 +68,8 @@ export default async function OgImage({
             W
           </div>
           <div style={{ display: "flex" }}>
-            Waitlist<span style={{ color: "#34d399", marginLeft: 2 }}>Kit</span>
+            Waitlist
+            <span style={{ color: palette.brand, marginLeft: 2 }}>Kit</span>
           </div>
         </div>
 
@@ -71,12 +81,12 @@ export default async function OgImage({
               gap: 14,
               fontSize: 22,
               fontFamily: "monospace",
-              color: "#34d399",
+              color: palette.brand,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
             }}
           >
-            <div style={{ width: 28, height: 2, background: "#34d399" }} />
+            <div style={{ width: 28, height: 2, background: palette.brand }} />
             Now in beta
           </div>
           <div
@@ -116,8 +126,8 @@ export default async function OgImage({
               gap: 14,
               padding: "14px 24px",
               borderRadius: 999,
-              background: "#34d399",
-              color: "#04140d",
+              background: palette.brand,
+              color: palette.ink,
               fontSize: 26,
               fontWeight: 600,
             }}
@@ -130,8 +140,6 @@ export default async function OgImage({
         </div>
       </div>
     ),
-    {
-      ...size,
-    },
+    { ...size },
   );
 }

@@ -23,7 +23,7 @@ export function OwnerBanner({ slug }: { slug: string }) {
     <div className="border-b border-brand/30 bg-brand-soft">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[#04140d]">
+          <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-brand-ink">
             ✓
           </span>
           <div>
@@ -42,7 +42,7 @@ export function OwnerBanner({ slug }: { slug: string }) {
           <button
             onClick={copy}
             type="button"
-            className="inline-flex h-8 items-center rounded-full bg-brand px-3 text-xs font-semibold text-[#04140d] transition hover:bg-brand-strong"
+            className="inline-flex h-8 items-center rounded-full bg-brand px-3 text-xs font-semibold text-brand-ink transition hover:bg-brand-strong"
           >
             {copied ? "Copied!" : "Copy"}
           </button>

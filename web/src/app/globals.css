@@ -12,6 +12,7 @@
   --color-brand: #34d399;
   --color-brand-strong: #10b981;
   --color-brand-soft: rgba(52, 211, 153, 0.12);
+  --color-brand-ink: #04140d;
   --color-accent: #a78bfa;
   --color-danger: #f87171;
   --font-sans: var(--font-geist-sans);
@@ -46,15 +47,15 @@ body {
 .bg-radial-brand {
   background-image: radial-gradient(
     ellipse 80% 50% at 50% -10%,
-    rgba(52, 211, 153, 0.18),
+    color-mix(in srgb, var(--color-brand) 18%, transparent),
     transparent 70%
   );
 }
 
 .glow-brand {
   box-shadow:
-    0 0 0 1px rgba(52, 211, 153, 0.18),
-    0 12px 40px -10px rgba(52, 211, 153, 0.35);
+    0 0 0 1px color-mix(in srgb, var(--color-brand) 18%, transparent),
+    0 12px 40px -10px color-mix(in srgb, var(--color-brand) 35%, transparent);
 }
 
 .text-gradient {

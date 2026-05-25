@@ -34,7 +34,7 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-4 text-sm">
             <Link
               href="#create"
-              className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 font-semibold text-[#04140d] transition hover:bg-brand-strong"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 font-semibold text-brand-ink transition hover:bg-brand-strong"
             >
               Launch a waitlist — free
             </Link>

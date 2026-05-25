@@ -1,15 +1,18 @@
 import "server-only";
-import { and, asc, desc, eq, gt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, sql } from "drizzle-orm";
 import { db, ensureSchema } from "./db/client";
 import {
   waitlists,
   signups,
+  owners,
   DEMO_OWNER_ID,
   type Waitlist,
   type Signup,
+  type Owner,
 } from "./db/schema";
+import { decrypt } from "./crypto";
 
-export type { Waitlist, Signup };
+export type { Waitlist, Signup, Owner };
 export { DEMO_OWNER_ID };
 
 export async function getWaitlist(slug: string): Promise<Waitlist | undefined> {
@@ -106,7 +109,19 @@ export async function updateWaitlistCopy(
   patch: Partial<
     Pick<
       Waitlist,
-      "productName" | "tagline" | "description" | "ctaLabel" | "accentEmoji" | "perks" | "webhookUrl"
+      | "productName"
+      | "tagline"
+      | "description"
+      | "ctaLabel"
+      | "accentEmoji"
+      | "accentColor"
+      | "perks"
+      | "webhookUrl"
+      | "welcomeEmailEnabled"
+      | "welcomeEmailSubject"
+      | "welcomeEmailBody"
+      | "welcomeEmailFromName"
+      | "welcomeEmailFromEmail"
     >
   >,
 ): Promise<boolean> {
@@ -115,7 +130,6 @@ export async function updateWaitlistCopy(
     .update(waitlists)
     .set(patch)
     .where(and(eq(waitlists.slug, slug), eq(waitlists.ownerId, ownerId)));
-  // libSQL returns affected rows on `rowsAffected`
   const affected =
     (result as unknown as { rowsAffected?: number }).rowsAffected ?? 1;
   return affected > 0;
@@ -177,8 +191,69 @@ export async function signupExists(
 }
 
 /**
- * Seed the public "Lumen AI" demo. Owned by the special DEMO_OWNER_ID
- * so it never appears in a real user's dashboard. Idempotent.
+ * Return per-day signup counts for the last N days (inclusive of today).
+ * Used by the dashboard sparkline.
+ */
+export async function signupsByDay(
+  slug: string,
+  days = 14,
+): Promise<{ date: string; count: number }[]> {
+  await ensureSchema();
+  const now = new Date();
+  const buckets: { date: string; count: number }[] = [];
+  const dateToIndex = new Map<string, number>();
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() - i);
+    const iso = d.toISOString().slice(0, 10);
+    dateToIndex.set(iso, buckets.length);
+    buckets.push({ date: iso, count: 0 });
+  }
+
+  const since = Date.now() - days * 24 * 60 * 60 * 1000;
+  const rows = await db
+    .select({ joinedAt: signups.joinedAt })
+    .from(signups)
+    .where(and(eq(signups.waitlistSlug, slug), gte(signups.joinedAt, since)));
+
+  for (const r of rows) {
+    const iso = new Date(r.joinedAt).toISOString().slice(0, 10);
+    const idx = dateToIndex.get(iso);
+    if (idx !== undefined) buckets[idx].count += 1;
+  }
+
+  return buckets;
+}
+
+/**
+ * Fetch the owner row + decrypted Resend key (or null if not configured).
+ */
+export async function getOwnerWithResendKey(
+  ownerId: string,
+): Promise<{ owner: Owner; resendApiKey: string | null } | null> {
+  await ensureSchema();
+  const rows = await db.select().from(owners).where(eq(owners.id, ownerId)).limit(1);
+  const owner = rows[0];
+  if (!owner) return null;
+  return {
+    owner,
+    resendApiKey: decrypt(owner.resendApiKeyEncrypted),
+  };
+}
+
+export async function updateOwnerSettings(
+  ownerId: string,
+  patch: { resendApiKeyEncrypted?: string | null; defaultFromEmail?: string | null },
+): Promise<void> {
+  await ensureSchema();
+  await db.update(owners).set(patch).where(eq(owners.id, ownerId));
+}
+
+/**
+ * Seed the public "Lumen AI" demo. Owned by DEMO_OWNER_ID so it never
+ * appears in a real user's dashboard. Idempotent.
  */
 export async function ensureDemoSeed(): Promise<void> {
   await ensureSchema();
@@ -195,7 +270,13 @@ export async function ensureDemoSeed(): Promise<void> {
       "Lumen reads your entire repo, learns your conventions, and writes PRs that pass review on the first try. Join the waitlist for early access.",
     ctaLabel: "Get early access",
     accentEmoji: "✦",
+    accentColor: "emerald",
     webhookUrl: null,
+    welcomeEmailEnabled: false,
+    welcomeEmailSubject: null,
+    welcomeEmailBody: null,
+    welcomeEmailFromName: null,
+    welcomeEmailFromEmail: null,
     perks: [
       "Skip the queue with 1 referral",
       "Lifetime 30% off for the first 500 users",

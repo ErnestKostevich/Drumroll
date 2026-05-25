@@ -43,7 +43,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
             >
               Try again
             </button>

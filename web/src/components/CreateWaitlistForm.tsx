@@ -184,7 +184,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Launching…" : "Launch waitlist →"}
     </button>

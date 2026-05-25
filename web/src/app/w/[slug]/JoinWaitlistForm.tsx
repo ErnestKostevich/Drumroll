@@ -57,7 +57,7 @@ function SubmitButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Joining…" : label}
     </button>

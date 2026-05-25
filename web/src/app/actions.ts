@@ -13,13 +13,16 @@ import {
   signupExists,
   slugExists,
   totalSignups,
+  updateOwnerSettings,
   updateWaitlistCopy,
 } from "@/lib/store";
 import { generateCopy, sanitizeCopy, type CopyOutput } from "@/lib/copy-gen";
 import { toSlug, randomSuffix } from "@/lib/slug";
 import { getCurrentOwner, getOrCreateOwner } from "@/lib/auth";
-import { PLAN_LIMITS } from "@/lib/db/schema";
+import { PLAN_LIMITS, ACCENT_PALETTE, type AccentColor } from "@/lib/db/schema";
 import { ipFrom, limit } from "@/lib/rate-limit";
+import { encrypt } from "@/lib/crypto";
+import { maybeSendWelcomeEmail } from "@/lib/email";
 
 export type CreateState = {
   error?: string;
@@ -77,6 +80,10 @@ async function rateLimit(prefix: string, max: number, windowMs: number): Promise
   return limit(`${prefix}:${ip}`, max, windowMs).ok;
 }
 
+function isAccentColor(v: unknown): v is AccentColor {
+  return typeof v === "string" && v in ACCENT_PALETTE;
+}
+
 export async function createWaitlist(
   _prev: CreateState,
   formData: FormData,
@@ -120,8 +127,14 @@ export async function createWaitlist(
     description: copy.longDescription,
     ctaLabel: copy.ctaLabel,
     accentEmoji: copy.accentEmoji,
+    accentColor: "emerald",
     perks: copy.perks,
     webhookUrl: null,
+    welcomeEmailEnabled: false,
+    welcomeEmailSubject: null,
+    welcomeEmailBody: null,
+    welcomeEmailFromName: null,
+    welcomeEmailFromEmail: null,
     createdAt: Date.now(),
   });
 
@@ -151,9 +164,7 @@ export async function joinWaitlist(
     return { error: "That email doesn't look right." };
   }
 
-  // Hobby-plan signup cap
   if (wl.ownerId !== "demo") {
-    const { PLAN_LIMITS } = await import("@/lib/db/schema");
     const { db } = await import("@/lib/db/client");
     const { owners } = await import("@/lib/db/schema");
     const { eq } = await import("drizzle-orm");
@@ -179,7 +190,7 @@ export async function joinWaitlist(
 
   await addSignup({ waitlistSlug: slug, email, referredBy });
 
-  // Fire webhook if configured (non-blocking)
+  // Webhook fire-and-forget
   if (wl.webhookUrl) {
     fetch(wl.webhookUrl, {
       method: "POST",
@@ -189,17 +200,20 @@ export async function joinWaitlist(
         waitlist: slug,
         email,
         referredBy,
+        source: "site",
         joinedAt: Date.now(),
       }),
-    }).catch(() => {
-      // ignore webhook failures
-    });
+    }).catch(() => {});
   }
 
   revalidatePath(`/w/${slug}`);
 
   const total = await totalSignups(slug);
   const position = (await positionFor(slug, email)) ?? total;
+
+  // Welcome email fire-and-forget
+  maybeSendWelcomeEmail({ slug, email, position, total }).catch(() => {});
+
   return { position, total, email };
 }
 
@@ -220,8 +234,18 @@ export async function updateWaitlist(
   const description = String(formData.get("description") ?? "").trim();
   const ctaLabel = String(formData.get("ctaLabel") ?? "").trim();
   const accentEmoji = String(formData.get("accentEmoji") ?? "").trim();
+  const accentColorRaw = String(formData.get("accentColor") ?? "").trim();
+  const accentColor: AccentColor = isAccentColor(accentColorRaw) ? accentColorRaw : "emerald";
   const perksRaw = String(formData.get("perks") ?? "").trim();
   const webhookUrl = String(formData.get("webhookUrl") ?? "").trim() || null;
+  const welcomeEmailEnabled = formData.get("welcomeEmailEnabled") === "on";
+  const welcomeEmailSubject =
+    String(formData.get("welcomeEmailSubject") ?? "").trim() || null;
+  const welcomeEmailBody = String(formData.get("welcomeEmailBody") ?? "").trim() || null;
+  const welcomeEmailFromName =
+    String(formData.get("welcomeEmailFromName") ?? "").trim() || null;
+  const welcomeEmailFromEmail =
+    String(formData.get("welcomeEmailFromEmail") ?? "").trim() || null;
 
   if (productName.length < 2 || tagline.length < 3 || description.length < 10) {
     return { error: "Product name, tagline, and description are required." };
@@ -239,8 +263,14 @@ export async function updateWaitlist(
     description,
     ctaLabel: ctaLabel || "Join the waitlist",
     accentEmoji,
+    accentColor,
     perks,
     webhookUrl,
+    welcomeEmailEnabled,
+    welcomeEmailSubject,
+    welcomeEmailBody,
+    welcomeEmailFromName,
+    welcomeEmailFromEmail,
   });
 
   if (!ok) return { error: "Update failed." };
@@ -258,4 +288,37 @@ export async function deleteWaitlistAction(slug: string): Promise<void> {
   await deleteWaitlistRow(owner.id, slug);
   revalidatePath("/dashboard");
   redirect("/dashboard");
+}
+
+export async function updateOwnerSettingsAction(
+  _prev: MutationState,
+  formData: FormData,
+): Promise<MutationState> {
+  const owner = await getOrCreateOwner();
+
+  const resendKey = String(formData.get("resendApiKey") ?? "").trim();
+  const defaultFromEmail =
+    String(formData.get("defaultFromEmail") ?? "").trim() || null;
+  const clearKey = formData.get("clearResendKey") === "on";
+
+  const patch: { resendApiKeyEncrypted?: string | null; defaultFromEmail?: string | null } = {
+    defaultFromEmail,
+  };
+
+  if (clearKey) {
+    patch.resendApiKeyEncrypted = null;
+  } else if (resendKey) {
+    if (!resendKey.startsWith("re_")) {
+      return { error: "Resend API key should start with `re_`." };
+    }
+    patch.resendApiKeyEncrypted = encrypt(resendKey);
+  }
+
+  if (defaultFromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(defaultFromEmail)) {
+    return { error: "Default from email doesn't look right." };
+  }
+
+  await updateOwnerSettings(owner.id, patch);
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
 }

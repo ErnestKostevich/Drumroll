@@ -1,14 +1,23 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { SignupSparkline } from "@/components/SignupSparkline";
 import { UpgradeCard } from "./UpgradeCard";
 import {
   ensureDemoSeed,
   listWaitlistsForOwner,
+  signupsByDay,
   totalSignups,
 } from "@/lib/store";
 import { getCurrentOwner } from "@/lib/auth";
-import { PLAN_LIMITS } from "@/lib/db/schema";
+import { ACCENT_PALETTE, PLAN_LIMITS, type AccentColor } from "@/lib/db/schema";
+
+type Row = {
+  slug: string;
+  total: number;
+  today: number;
+  last14: { date: string; count: number }[];
+};
 
 export default async function DashboardPage() {
   await ensureDemoSeed();
@@ -16,11 +25,27 @@ export default async function DashboardPage() {
 
   const waitlists = owner ? await listWaitlistsForOwner(owner.id) : [];
 
-  const counts = await Promise.all(
-    waitlists.map(async (w) => ({ slug: w.slug, count: await totalSignups(w.slug) })),
+  const rows: Row[] = await Promise.all(
+    waitlists.map(async (w) => {
+      const [total, days] = await Promise.all([
+        totalSignups(w.slug),
+        signupsByDay(w.slug, 14),
+      ]);
+      return {
+        slug: w.slug,
+        total,
+        today: days[days.length - 1]?.count ?? 0,
+        last14: days,
+      };
+    }),
   );
-  const countMap = new Map(counts.map((c) => [c.slug, c.count]));
-  const grandTotal = counts.reduce((acc, c) => acc + c.count, 0);
+  const rowMap = new Map(rows.map((r) => [r.slug, r]));
+  const grandTotal = rows.reduce((acc, r) => acc + r.total, 0);
+  const todayTotal = rows.reduce((acc, r) => acc + r.today, 0);
+  const last7Total = rows.reduce(
+    (acc, r) => acc + r.last14.slice(-7).reduce((a, b) => a + b.count, 0),
+    0,
+  );
 
   const plan = owner?.plan ?? "hobby";
   const limits = PLAN_LIMITS[plan];
@@ -60,12 +85,32 @@ export default async function DashboardPage() {
             </div>
             <div className="flex gap-3">
               <Link
+                href="/dashboard/settings"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-border-strong bg-surface px-4 text-sm font-medium text-foreground transition hover:border-brand/50"
+              >
+                Settings
+              </Link>
+              <Link
                 href="/#create"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
               >
                 + New waitlist
               </Link>
             </div>
+          </div>
+
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            <StatCard
+              label="Total signups"
+              value={String(grandTotal)}
+              hint="across your waitlists"
+            />
+            <StatCard
+              label="Today"
+              value={String(todayTotal)}
+              hint={`${last7Total} in the last 7 days`}
+            />
+            <StatCard label="Current plan" value={planLabel} hint={planHint(plan)} />
           </div>
 
           {plan === "hobby" && waitlists.length >= 1 ? (
@@ -75,8 +120,9 @@ export default async function DashboardPage() {
           ) : null}
 
           <div className="mt-10 overflow-hidden rounded-2xl border border-border bg-surface/40">
-            <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 border-b border-border bg-surface px-6 py-3 font-mono text-xs uppercase tracking-widest text-muted">
+            <div className="hidden grid-cols-[1.5fr_140px_0.8fr_0.8fr_auto] gap-4 border-b border-border bg-surface px-6 py-3 font-mono text-xs uppercase tracking-widest text-muted sm:grid">
               <span>Product</span>
+              <span>Last 14 days</span>
               <span>Signups</span>
               <span>Created</span>
               <span className="sr-only">Actions</span>
@@ -87,19 +133,41 @@ export default async function DashboardPage() {
             ) : (
               <ul>
                 {waitlists.map((wl) => {
-                  const total = countMap.get(wl.slug) ?? 0;
+                  const row = rowMap.get(wl.slug);
+                  const total = row?.total ?? 0;
                   const overCap = total >= limits.maxSignupsPerWaitlist;
+                  const palette = ACCENT_PALETTE[wl.accentColor as AccentColor];
                   return (
                     <li
                       key={wl.slug}
-                      className="grid grid-cols-[1.5fr_1fr_1fr_auto] items-center gap-4 border-b border-border/60 px-6 py-5 last:border-b-0"
+                      className="grid grid-cols-1 gap-3 border-b border-border/60 px-6 py-5 last:border-b-0 sm:grid-cols-[1.5fr_140px_0.8fr_0.8fr_auto] sm:items-center sm:gap-4"
+                      style={
+                        {
+                          "--color-brand": palette.brand,
+                          "--color-brand-strong": palette.strong,
+                          "--color-brand-soft": palette.soft,
+                          "--color-brand-ink": palette.ink,
+                        } as React.CSSProperties
+                      }
                     >
                       <div>
                         <p className="flex items-center gap-2 font-medium text-foreground">
-                          {wl.accentEmoji} {wl.productName}
+                          <span
+                            className="inline-flex h-5 w-5 items-center justify-center rounded-md text-xs"
+                            style={{ background: palette.soft, color: palette.brand }}
+                          >
+                            {wl.accentEmoji}
+                          </span>
+                          {wl.productName}
                         </p>
                         <p className="mt-1 line-clamp-1 text-sm text-muted">
                           {wl.tagline}
+                        </p>
+                      </div>
+                      <div>
+                        <SignupSparkline data={row?.last14 ?? []} width={140} height={32} />
+                        <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted">
+                          {row?.today ?? 0} today
                         </p>
                       </div>
                       <div>
@@ -122,7 +190,7 @@ export default async function DashboardPage() {
                           {formatDate(wl.createdAt)}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/w/${wl.slug}`}
                           className="rounded-full border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand/50"
@@ -137,7 +205,7 @@ export default async function DashboardPage() {
                         </Link>
                         <Link
                           href={`/w/${wl.slug}?owner=1`}
-                          className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-[#04140d] transition hover:bg-brand-strong"
+                          className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-brand-ink transition hover:bg-brand-strong"
                         >
                           Share
                         </Link>
@@ -149,19 +217,14 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <StatCard
-              label="Total signups"
-              value={String(grandTotal)}
-              hint="across your waitlists"
-            />
-            <StatCard label="Current plan" value={planLabel} hint={planHint(plan)} />
-            <StatCard
-              label="Owner ID"
-              value={owner ? owner.id.slice(0, 8) + "…" : "—"}
-              hint="bookmark this browser to keep access"
-            />
-          </div>
+          {owner ? (
+            <p className="mt-6 text-xs text-muted">
+              Owner ID:{" "}
+              <code className="font-mono text-foreground">{owner.id}</code>{" "}
+              — bookmark this browser to keep access. Multi-device auth coming
+              when paying customers ask for it.
+            </p>
+          ) : null}
         </div>
       </main>
       <Footer />
@@ -183,7 +246,7 @@ function EmptyDashboard() {
       </p>
       <Link
         href="/#create"
-        className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+        className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
       >
         + Create waitlist
       </Link>

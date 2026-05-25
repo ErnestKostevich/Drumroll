@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import {
   ensureDemoSeed,
@@ -8,6 +9,7 @@ import {
   topReferrers,
   totalSignups,
 } from "@/lib/store";
+import { ACCENT_PALETTE } from "@/lib/db/schema";
 import { Logo } from "@/components/Logo";
 import { JoinWaitlistForm } from "./JoinWaitlistForm";
 import { OwnerBanner } from "./OwnerBanner";
@@ -53,10 +55,21 @@ export default async function WaitlistPage({
   const isOwner = search.owner === "1";
   const ref = search.ref ?? null;
 
+  const palette = ACCENT_PALETTE[wl.accentColor];
+  const accentStyle = {
+    "--color-brand": palette.brand,
+    "--color-brand-strong": palette.strong,
+    "--color-brand-soft": palette.soft,
+    "--color-brand-ink": palette.ink,
+  } as CSSProperties;
+
   return (
     <>
       {isOwner ? <OwnerBanner slug={slug} /> : null}
-      <main className="relative flex-1 overflow-hidden">
+      <main
+        className="relative flex-1 overflow-hidden"
+        style={accentStyle}
+      >
         <div className="absolute inset-0 bg-grid opacity-60" aria-hidden />
         <div className="absolute inset-0 bg-radial-brand" aria-hidden />
 
@@ -123,7 +136,7 @@ export default async function WaitlistPage({
                       <span
                         className={
                           i === 0
-                            ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[#04140d] font-mono text-xs font-semibold"
+                            ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand text-brand-ink font-mono text-xs font-semibold"
                             : "inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface text-muted-strong font-mono text-xs"
                         }
                       >

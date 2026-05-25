@@ -100,7 +100,7 @@ export function ConnectAiModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-[#04140d] transition hover:bg-brand-strong"
+                className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-brand-ink transition hover:bg-brand-strong"
               >
                 Done
               </button>
@@ -157,7 +157,7 @@ export function ConnectAiModal({
               <button
                 type="button"
                 onClick={save}
-                className="flex-1 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+                className="flex-1 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
               >
                 Connect
               </button>

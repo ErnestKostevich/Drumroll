@@ -19,6 +19,9 @@ export function Header() {
           <Link href="/dashboard" className="transition hover:text-foreground">
             Dashboard
           </Link>
+          <Link href="/dashboard/settings" className="transition hover:text-foreground">
+            Settings
+          </Link>
         </nav>
         <div className="flex items-center gap-3">
           <Link
@@ -29,7 +32,7 @@ export function Header() {
           </Link>
           <Link
             href="/#create"
-            className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-sm font-medium text-[#04140d] transition hover:bg-brand-strong"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-sm font-medium text-brand-ink transition hover:bg-brand-strong"
           >
             Launch a waitlist
           </Link>

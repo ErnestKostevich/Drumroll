@@ -83,7 +83,7 @@ export function Pricing() {
               }
             >
               {p.highlight ? (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[#04140d]">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand-ink">
                   Most popular
                 </span>
               ) : null}
@@ -103,7 +103,7 @@ export function Pricing() {
                 href={p.href}
                 className={
                   p.highlight
-                    ? "mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+                    ? "mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
                     : "mt-6 inline-flex h-11 w-full items-center justify-center rounded-full border border-border-strong bg-surface text-sm font-medium text-foreground transition hover:border-brand/50"
                 }
               >

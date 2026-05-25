@@ -11,6 +11,7 @@ import { db, ensureSchema } from "@/lib/db/client";
 import { owners } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ipFrom, limit } from "@/lib/rate-limit";
+import { maybeSendWelcomeEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -117,5 +118,8 @@ export async function POST(req: Request) {
 
   const total = await totalSignups(slug);
   const position = (await positionFor(slug, email)) ?? total;
+
+  maybeSendWelcomeEmail({ slug, email, position, total }).catch(() => {});
+
   return jsonCors({ position, total, email });
 }

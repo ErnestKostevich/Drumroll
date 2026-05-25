@@ -21,7 +21,7 @@ export function FinalCta() {
             </p>
             <Link
               href="/#create"
-              className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-sm font-semibold text-[#04140d] transition hover:bg-brand-strong"
+              className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-brand px-7 text-sm font-semibold text-brand-ink transition hover:bg-brand-strong"
             >
               Launch your waitlist →
             </Link>
