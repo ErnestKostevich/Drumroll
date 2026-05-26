@@ -43,8 +43,9 @@ export function UpgradeCard() {
             You&apos;ve hit the Hobby waitlist limit.
           </p>
           <p className="mt-1 text-sm text-muted-strong">
-            Upgrade to Pro for unlimited waitlists, custom domain, and 25k
-            signups each. We don&apos;t markup AI tokens — BYOK pricing stays.
+            Upgrade to Pro for unlimited waitlists, 25k signups each, BYOK
+            welcome emails, and webhooks. We don&apos;t markup AI tokens —
+            BYOK pricing stays.
           </p>
           {error ? (
             <p className="mt-2 text-xs text-danger" aria-live="polite">
