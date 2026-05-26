@@ -23,6 +23,7 @@ import { PLAN_LIMITS, ACCENT_PALETTE, type AccentColor } from "@/lib/db/schema";
 import { ipFrom, limit } from "@/lib/rate-limit";
 import { encrypt } from "@/lib/crypto";
 import { maybeSendWelcomeEmail } from "@/lib/email";
+import { rejectInternalUrl } from "@/lib/url-validate";
 
 export type CreateState = {
   error?: string;
@@ -250,6 +251,11 @@ export async function updateWaitlist(
 
   if (productName.length < 2 || tagline.length < 3 || description.length < 10) {
     return { error: "Product name, tagline, and description are required." };
+  }
+
+  if (webhookUrl) {
+    const reason = rejectInternalUrl(webhookUrl);
+    if (reason) return { error: `Webhook URL rejected: ${reason}` };
   }
 
   const perks = perksRaw

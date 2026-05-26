@@ -22,15 +22,24 @@ function getKey(): Buffer {
   const secret = process.env.WAITLISTKIT_SECRET;
   if (secret && secret.length >= 16) {
     globalForKey.__waitlistkitKey = createHash("sha256").update(secret).digest();
-  } else {
-    if (!globalForKey.__waitlistkitKeyWarned) {
-      console.warn(
-        "[wk/crypto] WAITLISTKIT_SECRET not set — using ephemeral key. Encrypted secrets won't survive a restart.",
-      );
-      globalForKey.__waitlistkitKeyWarned = true;
-    }
-    globalForKey.__waitlistkitKey = randomBytes(32);
+    return globalForKey.__waitlistkitKey;
   }
+
+  if (process.env.NODE_ENV === "production") {
+    // Fail closed. Encrypted owner Resend keys would otherwise turn into
+    // unrecoverable garbage after each Vercel cold-start.
+    throw new Error(
+      "WAITLISTKIT_SECRET (>=16 chars) is required in production. Set it as an env var and redeploy.",
+    );
+  }
+
+  if (!globalForKey.__waitlistkitKeyWarned) {
+    console.warn(
+      "[wk/crypto] WAITLISTKIT_SECRET not set — using ephemeral key. Encrypted secrets won't survive a restart.",
+    );
+    globalForKey.__waitlistkitKeyWarned = true;
+  }
+  globalForKey.__waitlistkitKey = randomBytes(32);
   return globalForKey.__waitlistkitKey;
 }
 

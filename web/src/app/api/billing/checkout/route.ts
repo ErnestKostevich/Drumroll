@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { getOrCreateOwner, setOwnerPlan } from "@/lib/auth";
 import { createInvoice, PLAN_PRICE_USD } from "@/lib/nowpayments";
+import { ipFrom, limit } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/csrf";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,19 @@ type CheckoutBody = { plan?: "pro" | "team" };
  * (no LLC required) and has lower fees.
  */
 export async function POST(req: Request) {
+  if (!isSameOriginRequest(req)) {
+    return Response.json({ error: "Cross-site requests not allowed." }, { status: 403 });
+  }
+
+  const ip = ipFrom(req.headers);
+  const gate = limit(`checkout:${ip}`, 10, 60 * 60 * 1000);
+  if (!gate.ok) {
+    return Response.json(
+      { error: "Too many checkout attempts. Try again later." },
+      { status: 429 },
+    );
+  }
+
   let body: CheckoutBody;
   try {
     body = (await req.json()) as CheckoutBody;

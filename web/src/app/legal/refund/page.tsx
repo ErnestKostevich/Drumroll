@@ -11,7 +11,7 @@ export default function RefundPage() {
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">
         Refund policy
       </h1>
-      <p className="text-xs text-muted">Last updated: today.</p>
+      <p className="text-xs text-muted">Last updated: 2026-05-26.</p>
 
       <h2 className="text-xl font-semibold text-foreground">30-day guarantee</h2>
       <p>

@@ -70,8 +70,10 @@ export const PLAN_LIMITS: Record<
   { maxWaitlists: number; maxSignupsPerWaitlist: number }
 > = {
   hobby: { maxWaitlists: 1, maxSignupsPerWaitlist: 500 },
-  pro: { maxWaitlists: 50, maxSignupsPerWaitlist: 25_000 },
-  team: { maxWaitlists: 200, maxSignupsPerWaitlist: 250_000 },
+  // "Unlimited" in pricing copy. Sentinel-high so the cap effectively never
+  // fires in practice, while still keeping the schema typed.
+  pro: { maxWaitlists: 10_000, maxSignupsPerWaitlist: 25_000 },
+  team: { maxWaitlists: 100_000, maxSignupsPerWaitlist: 250_000 },
 };
 
 export const DEMO_OWNER_ID = "demo";

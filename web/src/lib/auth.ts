@@ -12,7 +12,9 @@ function generateId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  // Node 18+ / modern edge runtimes always expose webcrypto. If we got here,
+  // we're on something exotic and should fail rather than mint a guessable ID.
+  throw new Error("crypto.randomUUID unavailable; refusing to generate a guessable owner ID.");
 }
 
 async function findOwner(id: string): Promise<Owner | null> {

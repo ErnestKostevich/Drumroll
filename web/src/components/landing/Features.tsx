@@ -11,22 +11,22 @@ const features = [
   },
   {
     title: "Real-time analytics",
-    body: "Track signups, top referrers, conversion rate, and source. No third-party scripts, no setup.",
+    body: "Signups, top referrers, and 14-day daily trends on every waitlist. No third-party scripts, no setup, no cookies on the visitor.",
     glyph: "▲",
   },
   {
-    title: "Custom domains",
-    body: "Point your own domain in 30 seconds. SSL, OG images, and a polished page out of the box.",
+    title: "Six theme accents",
+    body: "Pick emerald, violet, amber, cyan, rose, or slate. The hero glow, CTA button, and OG share image all retint to match — no CSS needed.",
     glyph: "❋",
   },
   {
-    title: "Email automation",
-    body: "Welcome email on signup. Launch-day blast. Drip campaigns. All from one dashboard.",
+    title: "BYOK welcome email",
+    body: "Bring your Resend API key. Auto-send a templated email the moment someone joins, with merge tags for position and total.",
     glyph: "✺",
   },
   {
-    title: "Export anywhere",
-    body: "CSV download, Webhooks, Zapier, Resend, ConvertKit. Your data stays yours.",
+    title: "Export + webhooks",
+    body: "CSV download anytime. Per-waitlist webhook URL pings your stack on every signup (Slack, Zapier, your own API).",
     glyph: "◉",
   },
 ];

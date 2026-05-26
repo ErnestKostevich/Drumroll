@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">
         Privacy
       </h1>
-      <p className="text-xs text-muted">Last updated: today.</p>
+      <p className="text-xs text-muted">Last updated: 2026-05-26.</p>
 
       <p>
         Short version: we store the minimum needed to run your waitlist, we

@@ -47,7 +47,7 @@ export function Hero() {
           </div>
 
           <dl className="mt-12 grid grid-cols-3 gap-6 border-t border-border/60 pt-8">
-            <Stat label="Avg conv rate" value="38%" />
+            <Stat label="AI token markup" value="0%" />
             <Stat label="Setup time" value="< 60s" />
             <Stat label="Cost" value="$0 to start" />
           </dl>

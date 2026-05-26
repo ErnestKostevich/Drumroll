@@ -1,20 +1,42 @@
 import { setOwnerPlan } from "@/lib/auth";
-import { isPaymentSuccessful, verifyIpnSignature } from "@/lib/nowpayments";
+import {
+  isPaymentSuccessful,
+  PLAN_PRICE_USD,
+  verifyIpnSignature,
+} from "@/lib/nowpayments";
 
 export const runtime = "nodejs";
 
 /**
  * NOWPayments IPN endpoint. Wire this URL in your NOWPayments dashboard
- * (Store Settings → IPN callback URL):
+ * (Store Settings → Webhook URL):
  *   https://your-domain.com/api/billing/nowpayments/webhook
  *
- * Set NOWPAYMENTS_IPN_SECRET in env to verify HMAC signatures. Without
- * the secret this endpoint returns 200 dev-mode (does NOT update the plan).
+ * Required env: NOWPAYMENTS_IPN_SECRET (must match the secret shown in the
+ * NOWPayments dashboard when you created the IPN secret key).
+ *
+ * If NOWPAYMENTS_API_KEY is configured but the IPN secret is not, this
+ * endpoint fails closed (500) — a misconfigured IPN secret would otherwise
+ * let an attacker forge upgrades for any owner.
  */
 export async function POST(req: Request) {
+  const apiKey = process.env.NOWPAYMENTS_API_KEY;
   const ipnSecret = process.env.NOWPAYMENTS_IPN_SECRET;
+
+  // Fully unconfigured (no checkout side either) → dev mode no-op.
+  if (!apiKey && !ipnSecret) {
+    return Response.json({ ok: true, devMode: true, message: "NOWPayments not configured." });
+  }
+
+  // API key set but IPN secret missing → misconfiguration, fail closed.
   if (!ipnSecret) {
-    return Response.json({ ok: true, devMode: true, message: "IPN_SECRET not set; ignored." });
+    console.error(
+      "[wk/nowpayments] NOWPAYMENTS_API_KEY is set but NOWPAYMENTS_IPN_SECRET is missing. Webhook refusing to process anything until the secret is set.",
+    );
+    return Response.json(
+      { error: "IPN secret not configured. Webhook disabled." },
+      { status: 500 },
+    );
   }
 
   const sig = req.headers.get("x-nowpayments-sig");
@@ -33,6 +55,8 @@ export async function POST(req: Request) {
     order_id?: string;
     price_amount?: number;
     price_currency?: string;
+    pay_amount?: number;
+    actually_paid?: number;
   };
   try {
     event = JSON.parse(rawBody);
@@ -56,6 +80,24 @@ export async function POST(req: Request) {
 
   if (!ownerId || !plan) {
     return Response.json({ ok: true, ignored: "unparseable order_id" });
+  }
+
+  // Verify the actual price paid matches the plan price. NOWPayments converts
+  // crypto→USD on their side, so `price_amount` is what the invoice asked for.
+  // `actually_paid` (in crypto units) being less than expected would mark
+  // status as `partially_paid` which already short-circuits above, but check
+  // price_amount as defence-in-depth against a fake/replayed IPN with a low
+  // amount sneaking through.
+  const expectedUsd = PLAN_PRICE_USD[plan];
+  const paidUsd = Number(event.price_amount);
+  const currency = String(event.price_currency ?? "").toLowerCase();
+  if (currency !== "usd" || !Number.isFinite(paidUsd) || paidUsd + 0.01 < expectedUsd) {
+    console.warn(
+      `[wk/nowpayments] amount/currency mismatch for ${event.order_id}: got ${paidUsd} ${currency}, expected ${expectedUsd} usd`,
+    );
+    return Response.json(
+      { ok: true, ignored: "price mismatch", got: paidUsd, expected: expectedUsd },
+    );
   }
 
   const renewsAt = Date.now() + 30 * 24 * 60 * 60 * 1000;

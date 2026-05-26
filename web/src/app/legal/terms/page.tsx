@@ -11,7 +11,7 @@ export default function TermsPage() {
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">
         Terms of service
       </h1>
-      <p className="text-xs text-muted">Last updated: today.</p>
+      <p className="text-xs text-muted">Last updated: 2026-05-26.</p>
 
       <p>
         These are the rules for using WaitlistKit. They&apos;re written in
