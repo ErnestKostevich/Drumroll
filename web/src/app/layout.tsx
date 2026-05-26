@@ -20,8 +20,8 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "WaitlistKit — Beautiful waitlists for AI startups",
-    template: "%s · WaitlistKit",
+    default: "Drumroll — Beautiful waitlists for AI startups",
+    template: "%s · Drumroll",
   },
   description:
     "AI-generated copy. Viral referrals. Real analytics. Launch a waitlist your founders won't be embarrassed to share — live in 60 seconds.",
@@ -33,17 +33,17 @@ export const metadata: Metadata = {
     "referral",
     "indie hacker",
   ],
-  authors: [{ name: "WaitlistKit" }],
+  authors: [{ name: "Drumroll" }],
   openGraph: {
-    title: "WaitlistKit — Beautiful waitlists for AI startups",
+    title: "Drumroll — Beautiful waitlists for AI startups",
     description:
       "AI-generated copy. Viral referrals. Real analytics. Live in 60 seconds.",
     type: "website",
-    siteName: "WaitlistKit",
+    siteName: "Drumroll",
   },
   twitter: {
     card: "summary_large_image",
-    title: "WaitlistKit — Beautiful waitlists for AI startups",
+    title: "Drumroll — Beautiful waitlists for AI startups",
     description:
       "AI-generated copy. Viral referrals. Real analytics. Live in 60 seconds.",
   },

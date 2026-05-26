@@ -36,7 +36,7 @@ export function Logo({ href = "/" }: { href?: string }) {
         <span className="absolute inset-0 rounded-md ring-1 ring-inset ring-white/10 transition group-hover:ring-white/20" />
       </span>
       <span>
-        Waitlist<span className="text-brand">Kit</span>
+        Drum<span className="text-brand">roll</span>
       </span>
     </Link>
   );

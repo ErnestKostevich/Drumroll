@@ -69,8 +69,8 @@ export default async function OgImage({
             <div style={{ height: 5, background: palette.ink, opacity: 0.3, borderRadius: 2.5, width: "55%" }} />
           </div>
           <div style={{ display: "flex" }}>
-            Waitlist
-            <span style={{ color: palette.brand, marginLeft: 2 }}>Kit</span>
+            Drum
+            <span style={{ color: palette.brand, marginLeft: 2 }}>roll</span>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default async function OgImage({
             Join the waitlist →
           </div>
           <div style={{ display: "flex", fontSize: 22, color: "#8a93a6" }}>
-            Powered by WaitlistKit
+            Powered by Drumroll
           </div>
         </div>
       </div>

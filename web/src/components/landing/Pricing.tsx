@@ -13,7 +13,7 @@ const plans = [
       "1 waitlist",
       "Up to 500 signups",
       "Template-generated copy",
-      "WaitlistKit subdomain",
+      "Drumroll subdomain",
       "Viral referrals built-in",
       "CSV export",
     ],
@@ -41,7 +41,7 @@ const plans = [
     cadence: "/ month",
     tagline: "When traction outgrows Pro.",
     cta: "Talk to us",
-    href: "mailto:hello@waitlistkit.com",
+    href: "mailto:hello@drumroll.app",
     highlight: false,
     features: [
       "Everything in Pro",

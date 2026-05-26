@@ -143,7 +143,7 @@ export function brandEmailWrap({
         <tr><td style="padding:24px 32px 32px;">${bodyHtml}</td></tr>
         <tr><td style="padding:0 32px 24px;">
           <hr style="border:0;border-top:1px solid #e6e8ec;margin:0;"/>
-          <p style="margin:16px 0 0;font-size:12px;color:#9ca3af;">Sent via WaitlistKit. Reply directly to this email to reach the team.</p>
+          <p style="margin:16px 0 0;font-size:12px;color:#9ca3af;">Sent via Drumroll. Reply directly to this email to reach the team.</p>
         </td></tr>
       </table>
     </td></tr>

@@ -51,7 +51,7 @@ export function Footer() {
             </li>
             <li>
               <a
-                href="mailto:hello@waitlistkit.com"
+                href="mailto:hello@drumroll.app"
                 className="text-muted-strong transition hover:text-foreground"
               >
                 Contact
@@ -87,7 +87,7 @@ export function Footer() {
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 text-xs text-muted">
-          <span>© {new Date().getFullYear()} WaitlistKit. Built for builders.</span>
+          <span>© {new Date().getFullYear()} Drumroll. Built for builders.</span>
           <span className="font-mono">v0.0.1 · MVP</span>
         </div>
       </div>

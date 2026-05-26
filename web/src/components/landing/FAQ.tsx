@@ -1,7 +1,7 @@
 const faqs = [
   {
     q: "Do I need to know how to code?",
-    a: "Nope. You type a product name and one sentence. WaitlistKit generates the page and the referral mechanics for you.",
+    a: "Nope. You type a product name and one sentence. Drumroll generates the page and the referral mechanics for you.",
   },
   {
     q: "Why do I bring my own Anthropic API key?",
@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: "How is this different from Tally / waitlist.email / getwaitlist?",
-    a: "Those are generic form builders. WaitlistKit is purpose-built for AI startups — built-in viral referrals, AI-drafted copy in your product's voice, and conversion-tuned page templates that actually look like a 2026 launch.",
+    a: "Those are generic form builders. Drumroll is purpose-built for AI startups — built-in viral referrals, AI-drafted copy in your product's voice, and conversion-tuned page templates that actually look like a 2026 launch.",
   },
   {
     q: "Where is my data stored?",
@@ -47,7 +47,7 @@ export function FAQ() {
           <p className="mt-6 text-muted-strong">
             Still stuck?{" "}
             <a
-              href="mailto:hello@waitlistkit.com"
+              href="mailto:hello@drumroll.app"
               className="text-brand underline-offset-4 hover:underline"
             >
               Email us

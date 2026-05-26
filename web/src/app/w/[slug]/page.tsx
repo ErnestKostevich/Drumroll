@@ -80,7 +80,7 @@ export default async function WaitlistPage({
               href="/"
               className="text-xs text-muted transition hover:text-foreground"
             >
-              Powered by WaitlistKit
+              Powered by Drumroll
             </Link>
           </div>
 

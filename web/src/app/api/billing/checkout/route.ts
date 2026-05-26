@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       priceAmount: PLAN_PRICE_USD[plan],
       priceCurrency: "usd",
       orderId,
-      orderDescription: `WaitlistKit ${plan === "pro" ? "Pro" : "Team"} — 1 month`,
+      orderDescription: `Drumroll ${plan === "pro" ? "Pro" : "Team"} — 1 month`,
       ipnCallbackUrl: `${origin}/api/billing/nowpayments/webhook`,
       successUrl: `${origin}/dashboard?upgraded=1`,
       cancelUrl: `${origin}/dashboard?upgrade=cancelled`,

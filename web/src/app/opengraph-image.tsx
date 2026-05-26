@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "WaitlistKit — Beautiful waitlists for AI startups";
+export const alt = "Drumroll — Beautiful waitlists for AI startups";
 
 export default function OgImage() {
   return new ImageResponse(
@@ -48,7 +48,7 @@ export default function OgImage() {
             <div style={{ height: 6, background: "#04140d", opacity: 0.3, borderRadius: 3, width: "55%" }} />
           </div>
           <div style={{ display: "flex" }}>
-            Waitlist<span style={{ color: "#34d399", marginLeft: 2 }}>Kit</span>
+            Drum<span style={{ color: "#34d399", marginLeft: 2 }}>roll</span>
           </div>
         </div>
 

@@ -9,7 +9,7 @@ const SITE_URL =
  * Self-contained drop-in widget. Users add:
  *
  *   <div data-waitlist="my-slug"></div>
- *   <script src="https://waitlistkit.com/embed.js" async></script>
+ *   <script src="https://drumroll.app/embed.js" async></script>
  *
  * to their existing site. We render a styled email-capture form into each
  * matching div and POST signups to /api/embed/signup.
@@ -70,7 +70,7 @@ const SCRIPT = `(function(){
       target: "_blank",
       rel: "noreferrer",
       style: "margin-top:8px;display:inline-block;font-size:11px;color:rgba(255,255,255,0.45);text-decoration:none;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;"
-    }, ["Powered by WaitlistKit"]);
+    }, ["Powered by Drumroll"]);
 
     host.innerHTML = "";
     host.appendChild(form);

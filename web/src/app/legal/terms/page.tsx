@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms",
-  description: "Terms of service for using WaitlistKit.",
+  description: "Terms of service for using Drumroll.",
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
       <p className="text-xs text-muted">Last updated: 2026-05-26.</p>
 
       <p>
-        These are the rules for using WaitlistKit. They&apos;re written in
+        These are the rules for using Drumroll. They&apos;re written in
         plain English on purpose — read them, and if you don&apos;t agree,
         don&apos;t use the product.
       </p>
@@ -67,7 +67,7 @@ export default function TermsPage() {
 
       <h2 className="text-xl font-semibold text-foreground">No warranty</h2>
       <p>
-        WaitlistKit is provided &quot;as is&quot;. We do our best, but we
+        Drumroll is provided &quot;as is&quot;. We do our best, but we
         can&apos;t guarantee zero downtime, zero bugs, or that the service will
         forever exist. Don&apos;t make this the only place your signups live —
         export to CSV regularly if signups matter to you.
@@ -90,8 +90,8 @@ export default function TermsPage() {
       <h2 className="text-xl font-semibold text-foreground">Contact</h2>
       <p>
         Questions:{" "}
-        <a href="mailto:hello@waitlistkit.com" className="text-brand underline-offset-4 hover:underline">
-          hello@waitlistkit.com
+        <a href="mailto:hello@drumroll.app" className="text-brand underline-offset-4 hover:underline">
+          hello@drumroll.app
         </a>
         .
       </p>

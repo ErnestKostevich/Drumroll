@@ -1,7 +1,7 @@
 const features = [
   {
     title: "AI-generated copy",
-    body: "Type one sentence about your product. WaitlistKit drafts the hero, perks, and CTA in your voice — ready to ship.",
+    body: "Type one sentence about your product. Drumroll drafts the hero, perks, and CTA in your voice — ready to ship.",
     glyph: "✦",
   },
   {

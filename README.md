@@ -1,4 +1,4 @@
-# WaitlistKit
+# Drumroll
 
 > Beautiful waitlists for AI startups. Bring-your-own-key AI. Viral referrals. Real analytics. Live in 60 seconds.
 
@@ -35,7 +35,7 @@ Customers pay $19-49/mo for the hosting platform, branding, custom domain, refer
 
 | Plan | Price | What you get |
 |------|-------|--------------|
-| Hobby | $0 | 1 waitlist, 500 signups, template copy, WaitlistKit subdomain |
+| Hobby | $0 | 1 waitlist, 500 signups, template copy, Drumroll subdomain |
 | Pro | $19 / mo | Unlimited waitlists, 25k signups, custom domain, BYOK AI |
 | Team | $49 / mo | Pro + 250k signups, 5 seats, white-label, API access |
 

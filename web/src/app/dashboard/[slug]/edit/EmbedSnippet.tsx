@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 export function EmbedSnippet({ slug }: { slug: string }) {
-  const [origin, setOrigin] = useState("https://waitlistkit.com");
+  const [origin, setOrigin] = useState("https://drumroll.app");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
