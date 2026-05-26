@@ -41,7 +41,7 @@ const plans = [
     cadence: "/ month",
     tagline: "When traction outgrows Pro.",
     cta: "Talk to us",
-    href: "mailto:hello@drumroll.app",
+    href: "mailto:ernest2011kostevich@gmail.com",
     highlight: false,
     features: [
       "Everything in Pro",

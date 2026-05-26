@@ -47,7 +47,7 @@ export function FAQ() {
           <p className="mt-6 text-muted-strong">
             Still stuck?{" "}
             <a
-              href="mailto:hello@drumroll.app"
+              href="mailto:ernest2011kostevich@gmail.com"
               className="text-brand underline-offset-4 hover:underline"
             >
               Email us

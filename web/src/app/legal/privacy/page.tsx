@@ -67,8 +67,8 @@ export default function PrivacyPage() {
         You can export your signups as CSV at any time from the dashboard&apos;s
         edit page. You can delete a waitlist (and all its signups) from the
         same place. To delete your owner account entirely, email{" "}
-        <a href="mailto:hello@drumroll.app" className="text-brand underline-offset-4 hover:underline">
-          hello@drumroll.app
+        <a href="mailto:ernest2011kostevich@gmail.com" className="text-brand underline-offset-4 hover:underline">
+          ernest2011kostevich@gmail.com
         </a>{" "}
         from any address — we&apos;ll purge within 7 days.
       </p>
@@ -76,8 +76,8 @@ export default function PrivacyPage() {
       <h2 className="text-xl font-semibold text-foreground">Contact</h2>
       <p>
         Questions:{" "}
-        <a href="mailto:hello@drumroll.app" className="text-brand underline-offset-4 hover:underline">
-          hello@drumroll.app
+        <a href="mailto:ernest2011kostevich@gmail.com" className="text-brand underline-offset-4 hover:underline">
+          ernest2011kostevich@gmail.com
         </a>
         .
       </p>

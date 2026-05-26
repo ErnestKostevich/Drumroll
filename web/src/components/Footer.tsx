@@ -51,7 +51,7 @@ export function Footer() {
             </li>
             <li>
               <a
-                href="mailto:hello@drumroll.app"
+                href="mailto:ernest2011kostevich@gmail.com"
                 className="text-muted-strong transition hover:text-foreground"
               >
                 Contact

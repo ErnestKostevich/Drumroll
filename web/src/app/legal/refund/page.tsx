@@ -16,8 +16,8 @@ export default function RefundPage() {
       <h2 className="text-xl font-semibold text-foreground">30-day guarantee</h2>
       <p>
         Within 30 days of your first Pro or Team payment, email{" "}
-        <a href="mailto:hello@drumroll.app" className="text-brand underline-offset-4 hover:underline">
-          hello@drumroll.app
+        <a href="mailto:ernest2011kostevich@gmail.com" className="text-brand underline-offset-4 hover:underline">
+          ernest2011kostevich@gmail.com
         </a>{" "}
         and we&apos;ll refund you in full, no questions asked. We&apos;d rather
         give you your money back than have an unhappy customer.
@@ -42,8 +42,8 @@ export default function RefundPage() {
       <h2 className="text-xl font-semibold text-foreground">How to request</h2>
       <p>
         Send an email from the address on your Stripe receipt to{" "}
-        <a href="mailto:hello@drumroll.app" className="text-brand underline-offset-4 hover:underline">
-          hello@drumroll.app
+        <a href="mailto:ernest2011kostevich@gmail.com" className="text-brand underline-offset-4 hover:underline">
+          ernest2011kostevich@gmail.com
         </a>{" "}
         with the subject &quot;refund&quot;. We process within 3 business days
         and Stripe takes another 5–10 days to land the funds back on your card.
