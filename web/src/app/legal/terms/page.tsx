@@ -21,9 +21,8 @@ export default function TermsPage() {
 
       <h2 className="text-xl font-semibold text-foreground">Your account</h2>
       <p>
-        Account = the random owner ID in your browser cookie (plus, on paid
-        plans, the linked Stripe customer). Don&apos;t share that cookie with
-        anyone you don&apos;t want managing your waitlists.
+        Account = the random owner ID in your browser cookie. Don&apos;t share
+        that cookie with anyone you don&apos;t want managing your waitlists.
       </p>
 
       <h2 className="text-xl font-semibold text-foreground">Acceptable use</h2>
@@ -54,7 +53,9 @@ export default function TermsPage() {
       <ul className="list-disc space-y-2 pl-5">
         <li>Hobby is free, with the limits shown on the pricing page.</li>
         <li>
-          Pro and Team are subscriptions billed monthly via Stripe. Cancel
+          Pro and Team are billed in crypto via NOWPayments. Each payment
+          covers 30 days; the plan reverts to Hobby automatically if you
+          don&apos;t renew. Cancel
           anytime from the customer portal; access continues until the end of
           the current period.
         </li>

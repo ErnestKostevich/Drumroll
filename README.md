@@ -64,8 +64,7 @@ No token markup. Customers bring their own AI / email keys, pay providers direct
 - **libSQL + Drizzle ORM** — local file-based SQLite for dev (`file:./local.db`), Turso for prod (same code, two env vars)
 - **Anthropic Claude** for AI copy (optional, BYOK — proxied through `/api/ai/generate`, key never logged or stored)
 - **Resend** for welcome emails (optional, BYOK — owner key encrypted AES-256-GCM at rest)
-- **NOWPayments** for crypto checkout (primary) — accepts BTC, ETH, USDT and 300+ coins
-- **Stripe** as fallback (for operators with an LLC who prefer cards)
+- **NOWPayments** for crypto checkout — accepts BTC, ETH, USDT and 300+ coins, no LLC required, ~0.5% fees
 - **next/og** for dynamic per-waitlist Open Graph images
 
 ## Repo layout
@@ -89,9 +88,8 @@ No token markup. Customers bring their own AI / email keys, pay providers direct
         │   ├── w/[slug]/opengraph-image.tsx   # per-waitlist OG (themed)
         │   ├── legal/{privacy,terms,refund}/  # legal pages
         │   ├── api/ai/generate/               # BYOK Anthropic proxy
-        │   ├── api/billing/checkout/          # unified checkout — NOWPayments primary, Stripe fallback, dev-mode self-upgrade
+        │   ├── api/billing/checkout/          # checkout entry — NOWPayments or dev-mode self-upgrade
         │   ├── api/billing/nowpayments/       # NOWPayments checkout + IPN webhook
-        │   ├── api/billing/webhook/           # Stripe webhook
         │   ├── api/embed/signup/              # CORS-enabled embed signup endpoint
         │   ├── api/waitlist/[slug]/signups.csv  # owner-only CSV export
         │   ├── embed.js/                      # public drop-in JS widget
@@ -178,12 +176,8 @@ In Vercel dashboard → Project → Settings → Environment Variables (or via `
 | `DATABASE_AUTH_TOKEN` | ✅ | `eyJh...` (from Turso) |
 | `WAITLISTKIT_SECRET` | ✅ | 32+ byte hex string |
 | `NEXT_PUBLIC_SITE_URL` | ✅ | `https://your-canonical-domain.com` (used by robots.txt/sitemap.xml/embed.js — without it they point to the per-deploy URL) |
-| `NOWPAYMENTS_API_KEY` | crypto | from NOWPayments dashboard |
-| `NOWPAYMENTS_IPN_SECRET` | crypto | webhook signing secret |
-| `STRIPE_SECRET_KEY` | cards | only if you want card fallback |
-| `STRIPE_PRICE_PRO` | cards | Stripe price ID for $19 plan |
-| `STRIPE_PRICE_TEAM` | cards | Stripe price ID for $49 plan |
-| `STRIPE_WEBHOOK_SECRET` | cards | webhook signing secret |
+| `NOWPAYMENTS_API_KEY` | for real payments | from NOWPayments dashboard → Settings → API Keys |
+| `NOWPAYMENTS_IPN_SECRET` | for real payments | from NOWPayments dashboard → Settings → Instant payment notifications |
 
 Then `npx vercel deploy --prod` again to pick them up.
 
@@ -196,7 +190,7 @@ Vercel dashboard → Project → Domains → add `drumroll.app` (or whatever you
 - **CSRF** — `/api/billing/checkout` and `/api/billing/nowpayments/checkout` reject cross-site requests via `Sec-Fetch-Site` header.
 - **SSRF** — user-supplied webhook URLs validated against private IP ranges (RFC1918, 169.254/16 AWS IMDS, IPv6 loopback/link-local) before any outbound `fetch`.
 - **Secret encryption** — owner Resend keys stored AES-256-GCM with master key from `WAITLISTKIT_SECRET`; production fails closed if missing.
-- **Webhook signature verification** — NOWPayments IPN verified via HMAC-SHA512 over alphabetically-sorted JSON; Stripe via `stripe.webhooks.constructEvent` (signature + 5-min timestamp).
+- **Webhook signature verification** — NOWPayments IPN verified via HMAC-SHA512 over alphabetically-sorted JSON.
 - **Price verification** — both webhooks re-derive plan from actual paid amount / price ID, not from owner-controllable metadata.
 - **Rate limits** — in-memory sliding-window per IP: 30/hr AI proxy, 10/hr create + checkout, 60/min joins per slug.
 - **Cookie ownership** — `wk_owner` cookie is httpOnly + SameSite=Lax; secure in production. ID is `crypto.randomUUID()` (no `Math.random` fallback).

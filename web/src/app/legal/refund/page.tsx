@@ -41,12 +41,13 @@ export default function RefundPage() {
 
       <h2 className="text-xl font-semibold text-foreground">How to request</h2>
       <p>
-        Send an email from the address on your Stripe receipt to{" "}
+        Send an email from any address you used during signup to{" "}
         <a href="mailto:ernest2011kostevich@gmail.com" className="text-brand underline-offset-4 hover:underline">
           ernest2011kostevich@gmail.com
         </a>{" "}
         with the subject &quot;refund&quot;. We process within 3 business days
-        and Stripe takes another 5–10 days to land the funds back on your card.
+        and NOWPayments returns the crypto to your originating wallet within
+        24 hours.
       </p>
     </>
   );

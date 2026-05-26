@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "How do I pay?",
-    a: "Crypto by default — Bitcoin, Ethereum, USDT and 300+ other coins via NOWPayments. Cards via Stripe coming soon. Sub-1% transaction fees mean more money to the founders, less to payment processors.",
+    a: "Crypto only — Bitcoin, Ethereum, USDT and 300+ other coins via NOWPayments. Sub-1% transaction fees mean more money to the founder, less to payment processors. No cards, no LLC required, no PayPal-style chargebacks.",
   },
   {
     q: "Is there a refund?",

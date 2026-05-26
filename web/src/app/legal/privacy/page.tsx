@@ -59,7 +59,7 @@ export default function PrivacyPage() {
         <li><strong>Anthropic</strong> — AI calls if you opt into BYOK copy generation.</li>
         <li><strong>Turso</strong> — managed libSQL database hosting (if deployed to prod).</li>
         <li><strong>Vercel</strong> — application hosting, edge network.</li>
-        <li><strong>Stripe</strong> — payment processing (only if you upgrade to a paid plan).</li>
+        <li><strong>NOWPayments</strong> — crypto payment processing (only if you upgrade to a paid plan).</li>
       </ul>
 
       <h2 className="text-xl font-semibold text-foreground">Your rights</h2>
