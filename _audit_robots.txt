@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Allow: /legal/
+Disallow: /dashboard
+Disallow: /api/
+
+Host: https://waitlistkit-three.vercel.app
+Sitemap: https://waitlistkit-three.vercel.app/sitemap.xml

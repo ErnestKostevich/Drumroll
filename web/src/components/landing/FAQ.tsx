@@ -12,8 +12,8 @@ const faqs = [
     a: "Yes. Without a key, copy comes from a clean template generator — still hosts a beautiful waitlist, just without the AI polish. Add a key anytime to upgrade existing waitlists.",
   },
   {
-    q: "Can I use my own domain?",
-    a: "Yes — Pro and Team plans support custom domains. Add a CNAME and we handle SSL automatically. The page lives on your domain, not ours.",
+    q: "Can I use a custom domain?",
+    a: "Not yet — every waitlist lives at drumroll.app/w/[slug] for now. Custom domains per waitlist are on the roadmap once we hear from enough paying customers asking for it. Your OG image and shareable URL still look clean today.",
   },
   {
     q: "How is this different from Tally / waitlist.email / getwaitlist?",

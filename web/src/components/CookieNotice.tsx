@@ -30,7 +30,12 @@ export function CookieNotice() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-border bg-surface/95 p-4 shadow-2xl shadow-black/50 backdrop-blur sm:left-6 sm:right-auto sm:bottom-6 sm:p-5">
+    <div
+      role="dialog"
+      aria-label="Cookie notice"
+      aria-describedby="cookie-notice-body"
+      className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-border bg-surface/95 p-4 shadow-2xl shadow-black/50 backdrop-blur sm:left-6 sm:right-auto sm:bottom-6 sm:p-5"
+    >
       <p className="text-sm text-muted-strong">
         We set a single first-party cookie (<code className="font-mono text-xs text-brand">wk_owner</code>)
         so your dashboard shows only your waitlists. No third-party
