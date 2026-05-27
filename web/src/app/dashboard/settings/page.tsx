@@ -5,6 +5,7 @@ import { getCurrentOwner } from "@/lib/auth";
 import { getOwnerWithResendKey } from "@/lib/store";
 import { SettingsForm } from "./SettingsForm";
 import { NoOwnerNotice } from "./NoOwnerNotice";
+import { RecoveryNotice } from "../RecoveryNotice";
 
 export default async function SettingsPage() {
   const owner = await getCurrentOwner();
@@ -51,6 +52,10 @@ export default async function SettingsPage() {
             >
               ← Back to dashboard
             </Link>
+          </div>
+
+          <div className="mt-8">
+            <RecoveryNotice ownerId={owner.id} variant="always" />
           </div>
 
           <div className="mt-8">

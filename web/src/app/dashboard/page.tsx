@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SignupSparkline } from "@/components/SignupSparkline";
 import { UpgradeCard } from "./UpgradeCard";
+import { RecoveryNotice } from "./RecoveryNotice";
 import {
   ensureDemoSeed,
   listWaitlistsForOwner,
@@ -19,9 +20,18 @@ type Row = {
   last14: { date: string; count: number }[];
 };
 
-export default async function DashboardPage() {
+type Search = { upgraded?: string; recovered?: string; upgrade?: string };
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Search>;
+}) {
   await ensureDemoSeed();
   const owner = await getCurrentOwner();
+  const search = await searchParams;
+  const showUpgradedBanner = search.upgraded === "1" && !!owner;
+  const showRecoveredBanner = search.recovered === "1" && !!owner;
 
   const waitlists = owner ? await listWaitlistsForOwner(owner.id) : [];
 
@@ -125,6 +135,18 @@ export default async function DashboardPage() {
               }
             />
           </div>
+
+          {showUpgradedBanner && owner ? (
+            <div className="mt-8">
+              <RecoveryNotice ownerId={owner.id} variant="upgraded" />
+            </div>
+          ) : null}
+
+          {showRecoveredBanner && owner ? (
+            <div className="mt-8">
+              <RecoveryNotice ownerId={owner.id} variant="recovered" />
+            </div>
+          ) : null}
 
           {plan === "hobby" && waitlists.length >= 1 ? (
             <div className="mt-8">
