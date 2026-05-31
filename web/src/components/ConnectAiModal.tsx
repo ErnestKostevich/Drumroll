@@ -57,6 +57,9 @@ export function ConnectAiModal({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Connect Anthropic API key"
         className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >

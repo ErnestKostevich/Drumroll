@@ -23,7 +23,10 @@ A purpose-built waitlist product for AI startup founders, built on a **zero-cost
 - **🥁 Embed widget** — drop two tags on any site and the waitlist signup form renders inline. CORS-enabled, no CSS or framework required on the host.
 - **🥁 Welcome emails (BYOK Resend)** — auto-send a templated email on signup with `{{position}}`, `{{total}}`, `{{product}}` merge tags. Resend API key encrypted at rest with AES-256-GCM.
 - **🥁 Webhooks** — per-waitlist URL pings the founder's stack on every signup (Slack, Zapier, custom API). Source-tagged (site/embed).
-- **🥁 Owner dashboard** — cookie-scoped (no account, no password) with 14-day signup sparklines, today/7-day stats, and per-waitlist edit/delete + CSV export.
+- **🥁 Owner dashboard** — 14-day signup sparklines, today/7-day stats, and per-waitlist edit/delete + CSV export.
+- **🥁 Magic-link auth** — one email field on `/login` doubles as signup + login (no passwords). A one-time link (32-byte token, SHA-256 stored, 15-min TTL, single-use) is sent via the system email provider. New emails create an account on click; existing emails log in. Owners stay reachable across devices and after clearing cookies.
+- **🥁 Account recovery** — `/recover/[ownerId]` re-sets the ownership cookie from a saved recovery URL (third channel beyond email + cookie). Shown after upgrade and on the settings page.
+- **🥁 Pro is inbox-bound** — both checkout routes require a verified email before taking payment, so a paid plan can't be lost or hijacked via a stale/stolen cookie.
 
 ## How the operator (you) makes money
 
@@ -63,7 +66,8 @@ No token markup. Customers bring their own AI / email keys, pay providers direct
 - **TypeScript** (strict)
 - **libSQL + Drizzle ORM** — local file-based SQLite for dev (`file:./local.db`), Turso for prod (same code, two env vars)
 - **Anthropic Claude** for AI copy (optional, BYOK — proxied through `/api/ai/generate`, key never logged or stored)
-- **Resend** for welcome emails (optional, BYOK — owner key encrypted AES-256-GCM at rest)
+- **Resend** for per-owner welcome emails (optional, BYOK — owner key encrypted AES-256-GCM at rest)
+- **System email** for magic-link auth — provider auto-detected: **Brevo** (`BREVO_API_KEY` + `BREVO_SENDER_EMAIL`, single-sender verification, no domain needed, free 300/day — the zero-cost path) or **Resend** (`DRUMROLL_RESEND_KEY`, needs a verified domain). See `lib/system-email.ts`.
 - **NOWPayments** for crypto checkout — accepts BTC, ETH, USDT and 300+ coins, no LLC required, ~0.5% fees
 - **next/og** for dynamic per-waitlist Open Graph images
 
@@ -178,6 +182,9 @@ In Vercel dashboard → Project → Settings → Environment Variables (or via `
 | `NEXT_PUBLIC_SITE_URL` | ✅ | `https://your-canonical-domain.com` (used by robots.txt/sitemap.xml/embed.js — without it they point to the per-deploy URL) |
 | `NOWPAYMENTS_API_KEY` | for real payments | from NOWPayments dashboard → Settings → API Keys |
 | `NOWPAYMENTS_IPN_SECRET` | for real payments | from NOWPayments dashboard → Settings → Instant payment notifications |
+| `BREVO_API_KEY` | for magic-link auth | from brevo.com → SMTP & API → API Keys (free, single-sender, no domain) |
+| `BREVO_SENDER_EMAIL` | for magic-link auth | a verified sender on Brevo (your account email works out of the box) |
+| `BREVO_SENDER_NAME` | optional | display name, defaults to "Drumroll" |
 
 Then `npx vercel deploy --prod` again to pick them up.
 
@@ -201,7 +208,7 @@ Vercel dashboard → Project → Domains → add `drumroll.app` (or whatever you
 
 | Feature | Triggered by |
 |---------|--------------|
-| Magic-link auth (multi-device dashboard) | First customer complaint about losing access on a different browser |
+| ~~Magic-link auth~~ ✅ **shipped** (Brevo system email, `/login`, email-gated Pro) | – |
 | Custom domain per waitlist (`wait.theirstart.com` via Host-header routing) | 3+ customers asking |
 | Email drip campaigns (reminder, launch-day blast) | After product-market fit |
 | API tokens for programmatic create/list/export | Team-tier customer asks |
