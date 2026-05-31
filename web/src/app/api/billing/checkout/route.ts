@@ -39,6 +39,21 @@ export async function POST(req: Request) {
   }
 
   const owner = await getOrCreateOwner();
+
+  // Require verified email before taking real money. Locks the paid plan to
+  // the inbox so a stolen cookie can't lock the customer out.
+  if (!owner.email || !owner.emailVerifiedAt) {
+    return Response.json(
+      {
+        error: "verify_email",
+        message:
+          "Verify your email before upgrading. Your Pro subscription should be tied to your inbox so it can't be lost if you clear cookies or change browsers.",
+        verifyUrl: "/dashboard/settings",
+      },
+      { status: 403 },
+    );
+  }
+
   const nowKey = process.env.NOWPAYMENTS_API_KEY;
   const url = new URL(req.url);
   const origin = url.origin;

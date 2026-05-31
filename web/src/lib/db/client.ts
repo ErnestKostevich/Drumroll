@@ -20,11 +20,23 @@ export const db =
 const CREATE_OWNERS = `CREATE TABLE IF NOT EXISTS owners (
   id TEXT PRIMARY KEY,
   plan TEXT NOT NULL DEFAULT 'hobby',
+  email TEXT,
+  email_verified_at INTEGER,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   plan_renews_at INTEGER,
   resend_api_key_encrypted TEXT,
   default_from_email TEXT,
+  created_at INTEGER NOT NULL
+);`;
+
+const CREATE_MAGIC_LINKS = `CREATE TABLE IF NOT EXISTS magic_links (
+  token_hash TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  purpose TEXT NOT NULL,
+  owner_id TEXT,
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER,
   created_at INTEGER NOT NULL
 );`;
 
@@ -61,6 +73,9 @@ const CREATE_INDEXES = [
   `CREATE INDEX IF NOT EXISTS signups_slug_email_idx ON signups(waitlist_slug, email);`,
   `CREATE INDEX IF NOT EXISTS signups_joined_idx ON signups(joined_at);`,
   `CREATE INDEX IF NOT EXISTS waitlists_owner_idx ON waitlists(owner_id);`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS owners_email_uniq ON owners(email) WHERE email IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS magic_links_email_idx ON magic_links(email);`,
+  `CREATE INDEX IF NOT EXISTS magic_links_expires_idx ON magic_links(expires_at);`,
 ];
 
 async function tryAddColumn(
@@ -83,6 +98,7 @@ async function tryAddColumn(
 export async function ensureSchema(): Promise<void> {
   if (globalForDb.__waitlistkitDbInitialized) return;
   await client.execute(CREATE_OWNERS);
+  await client.execute(CREATE_MAGIC_LINKS);
   await client.execute(CREATE_WAITLISTS);
   await client.execute(CREATE_SIGNUPS);
 
@@ -100,6 +116,8 @@ export async function ensureSchema(): Promise<void> {
   await tryAddColumn("owners", "plan_renews_at", "INTEGER");
   await tryAddColumn("owners", "resend_api_key_encrypted", "TEXT");
   await tryAddColumn("owners", "default_from_email", "TEXT");
+  await tryAddColumn("owners", "email", "TEXT");
+  await tryAddColumn("owners", "email_verified_at", "INTEGER");
 
   for (const stmt of CREATE_INDEXES) {
     await client.execute(stmt);

@@ -1,16 +1,45 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
-export const owners = sqliteTable("owners", {
-  id: text("id").primaryKey(),
-  plan: text("plan", { enum: ["hobby", "pro", "team"] }).notNull().default("hobby"),
-  stripeCustomerId: text("stripe_customer_id"),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  planRenewsAt: integer("plan_renews_at"),
-  resendApiKeyEncrypted: text("resend_api_key_encrypted"),
-  defaultFromEmail: text("default_from_email"),
-  createdAt: integer("created_at").notNull(),
-});
+export const owners = sqliteTable(
+  "owners",
+  {
+    id: text("id").primaryKey(),
+    plan: text("plan", { enum: ["hobby", "pro", "team"] }).notNull().default("hobby"),
+    email: text("email"),
+    emailVerifiedAt: integer("email_verified_at"),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    planRenewsAt: integer("plan_renews_at"),
+    resendApiKeyEncrypted: text("resend_api_key_encrypted"),
+    defaultFromEmail: text("default_from_email"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [uniqueIndex("owners_email_uniq").on(t.email)],
+);
+
+export const magicLinks = sqliteTable(
+  "magic_links",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    email: text("email").notNull(),
+    purpose: text("purpose", { enum: ["login", "verify"] }).notNull(),
+    ownerId: text("owner_id"),
+    expiresAt: integer("expires_at").notNull(),
+    usedAt: integer("used_at"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [
+    index("magic_links_email_idx").on(t.email),
+    index("magic_links_expires_idx").on(t.expiresAt),
+  ],
+);
 
 export const waitlists = sqliteTable(
   "waitlists",
@@ -61,6 +90,7 @@ export const signups = sqliteTable(
 );
 
 export type Owner = typeof owners.$inferSelect;
+export type MagicLink = typeof magicLinks.$inferSelect;
 export type Waitlist = typeof waitlists.$inferSelect;
 export type NewWaitlist = typeof waitlists.$inferInsert;
 export type Signup = typeof signups.$inferSelect;
@@ -70,8 +100,6 @@ export const PLAN_LIMITS: Record<
   { maxWaitlists: number; maxSignupsPerWaitlist: number }
 > = {
   hobby: { maxWaitlists: 1, maxSignupsPerWaitlist: 500 },
-  // "Unlimited" in pricing copy. Sentinel-high so the cap effectively never
-  // fires in practice, while still keeping the schema typed.
   pro: { maxWaitlists: 10_000, maxSignupsPerWaitlist: 25_000 },
   team: { maxWaitlists: 100_000, maxSignupsPerWaitlist: 250_000 },
 };

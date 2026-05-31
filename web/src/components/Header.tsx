@@ -25,6 +25,12 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-3">
           <Link
+            href="/login"
+            className="hidden text-sm text-muted transition hover:text-foreground sm:inline"
+          >
+            Log in
+          </Link>
+          <Link
             href="/#create"
             className="inline-flex h-9 items-center justify-center rounded-full bg-brand px-4 text-sm font-medium text-brand-ink transition hover:bg-brand-strong"
           >

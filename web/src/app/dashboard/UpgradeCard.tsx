@@ -15,9 +15,21 @@ export function UpgradeCard() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ plan }),
       });
-      const data = (await res.json()) as { url?: string; error?: string };
+      const data = (await res.json()) as {
+        url?: string;
+        error?: string;
+        message?: string;
+        verifyUrl?: string;
+      };
       if (!res.ok) {
-        setError(data.error ?? "Checkout failed.");
+        if (data.error === "verify_email" && data.verifyUrl) {
+          setError(data.message ?? "Verify your email first.");
+          setTimeout(() => {
+            window.location.href = data.verifyUrl!;
+          }, 1600);
+        } else {
+          setError(data.error ?? "Checkout failed.");
+        }
       } else if (data.url) {
         window.location.href = data.url;
       } else {

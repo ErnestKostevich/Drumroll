@@ -251,6 +251,33 @@ export async function updateOwnerSettings(
   await db.update(owners).set(patch).where(eq(owners.id, ownerId));
 }
 
+export async function getOwnerByEmail(email: string): Promise<Owner | null> {
+  await ensureSchema();
+  const rows = await db
+    .select()
+    .from(owners)
+    .where(eq(owners.email, email.toLowerCase()))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function linkOwnerEmail(
+  ownerId: string,
+  email: string,
+): Promise<{ ok: true } | { ok: false; reason: "email_in_use" }> {
+  await ensureSchema();
+  const lower = email.toLowerCase();
+  const existing = await getOwnerByEmail(lower);
+  if (existing && existing.id !== ownerId) {
+    return { ok: false, reason: "email_in_use" };
+  }
+  await db
+    .update(owners)
+    .set({ email: lower, emailVerifiedAt: Date.now() })
+    .where(eq(owners.id, ownerId));
+  return { ok: true };
+}
+
 /**
  * Seed the public "Lumen AI" demo. Owned by DEMO_OWNER_ID so it never
  * appears in a real user's dashboard. Idempotent.

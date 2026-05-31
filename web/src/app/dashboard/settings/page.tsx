@@ -6,6 +6,7 @@ import { getOwnerWithResendKey } from "@/lib/store";
 import { SettingsForm } from "./SettingsForm";
 import { NoOwnerNotice } from "./NoOwnerNotice";
 import { RecoveryNotice } from "../RecoveryNotice";
+import { EmailLinker } from "./EmailLinker";
 
 export default async function SettingsPage() {
   const owner = await getCurrentOwner();
@@ -52,6 +53,13 @@ export default async function SettingsPage() {
             >
               ← Back to dashboard
             </Link>
+          </div>
+
+          <div className="mt-8">
+            <EmailLinker
+              currentEmail={owner.email ?? null}
+              verified={!!owner.emailVerifiedAt}
+            />
           </div>
 
           <div className="mt-8">
