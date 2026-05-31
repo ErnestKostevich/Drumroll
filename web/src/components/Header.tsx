@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { MobileMenu } from "./MobileMenu";
 
 export function Header() {
   return (
@@ -23,10 +24,12 @@ export function Header() {
             Settings
           </Link>
         </nav>
-        <div className="flex items-center gap-3">
+
+        {/* Desktop actions */}
+        <div className="hidden items-center gap-3 md:flex">
           <Link
             href="/login"
-            className="hidden text-sm text-muted transition hover:text-foreground sm:inline"
+            className="text-sm text-muted transition hover:text-foreground"
           >
             Log in
           </Link>
@@ -37,6 +40,9 @@ export function Header() {
             Launch a waitlist
           </Link>
         </div>
+
+        {/* Mobile hamburger (replaces the hidden nav below md) */}
+        <MobileMenu />
       </div>
     </header>
   );

@@ -37,6 +37,16 @@ export function Footer() {
                 Dashboard
               </Link>
             </li>
+            <li>
+              <Link href="/dashboard/settings" className="text-muted-strong transition hover:text-foreground">
+                Settings
+              </Link>
+            </li>
+            <li>
+              <Link href="/login" className="text-muted-strong transition hover:text-foreground">
+                Log in
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
