@@ -19,10 +19,11 @@ export function EmailLinker({
     setError(null);
     setLoading(true);
     try {
+      // Backend auto-detects intent from cookie context.
       const res = await fetch("/api/auth/request", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, link: true }),
+        body: JSON.stringify({ email }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) {

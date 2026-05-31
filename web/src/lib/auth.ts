@@ -71,6 +71,27 @@ export async function getOrCreateOwner(): Promise<Owner> {
 }
 
 /**
+ * Create a fresh owner row tied to an email. Used by the magic-link signup
+ * flow when someone enters a brand-new email on /login. The email is NOT
+ * verified yet — that happens when they click the link.
+ */
+export async function createOwnerForEmail(email: string): Promise<Owner> {
+  await ensureSchema();
+  const id = generateId();
+  const now = Date.now();
+  await db.insert(owners).values({
+    id,
+    plan: "hobby",
+    email: email.toLowerCase(),
+    emailVerifiedAt: null,
+    createdAt: now,
+  });
+  const created = await findOwner(id);
+  if (!created) throw new Error("Failed to create owner");
+  return created;
+}
+
+/**
  * Replace the current owner's plan. Called by the NOWPayments webhook
  * handler when a payment confirms, and by the dev-mode self-serve upgrade.
  */

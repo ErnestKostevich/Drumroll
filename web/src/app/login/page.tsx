@@ -17,14 +17,15 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-md px-6 py-16">
           <div className="rounded-2xl border border-border bg-surface/40 p-8">
             <p className="font-mono text-xs uppercase tracking-widest text-brand">
-              Welcome back
+              One field. No passwords.
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Log in to Drumroll
+              Log in or sign up
             </h1>
             <p className="mt-3 text-sm text-muted-strong">
-              Enter the email tied to your account. We&apos;ll send a one-time
-              link that signs you in for the next year.
+              Enter your email. We&apos;ll send a one-time magic link — clicking
+              it logs you in (or creates your account if you&apos;re new). No
+              passwords, no signup form.
             </p>
 
             <div className="mt-6">
@@ -32,11 +33,13 @@ export default function LoginPage() {
             </div>
 
             <p className="mt-6 text-xs text-muted">
-              Don&apos;t have an account yet? Just{" "}
+              Prefer no email at all? You can also just{" "}
               <Link href="/#create" className="text-brand underline-offset-4 hover:underline">
                 launch a waitlist
               </Link>
-              {" "}— no signup required to start.
+              {" "}— we&apos;ll set up an anonymous account via cookie. Add an
+              email later in Settings to unlock multi-device login (required
+              before Pro).
             </p>
           </div>
         </div>

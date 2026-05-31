@@ -48,6 +48,10 @@ export async function GET(req: Request) {
         { status: 404 },
       );
     }
+    // First-time successful login also doubles as email verification.
+    if (!owner.emailVerifiedAt) {
+      await linkOwnerEmail(owner.id, record.email);
+    }
     store.set("wk_owner", owner.id, cookieOptions);
     redirect("/dashboard?recovered=1");
   } else {

@@ -38,8 +38,9 @@ export function LoginForm() {
           Check your inbox
         </p>
         <p className="mt-2 text-sm text-foreground">
-          If <span className="font-mono">{email}</span> is tied to a Drumroll
-          account, a magic link is on the way. It expires in 15 minutes.
+          Magic link sent to <span className="font-mono">{email}</span>. Click
+          it within 15 minutes to log in. If you&apos;re new, the same link
+          creates your account — no separate signup needed.
         </p>
         <p className="mt-2 text-xs text-muted">
           Didn&apos;t get it? Check spam, then{" "}

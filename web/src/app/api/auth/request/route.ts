@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { getCurrentOwner } from "@/lib/auth";
+import { createOwnerForEmail, getCurrentOwner } from "@/lib/auth";
 import { getOwnerByEmail } from "@/lib/store";
 import { createMagicLink, buildMagicUrl } from "@/lib/magic-link";
 import { magicLinkEmail, sendSystemEmail } from "@/lib/system-email";
@@ -8,11 +8,23 @@ import { isSameOriginRequest } from "@/lib/csrf";
 
 export const runtime = "nodejs";
 
-type Body = {
-  email?: string;
-  link?: boolean; // if true, link to current cookie owner instead of logging in
-};
+type Body = { email?: string };
 
+/**
+ * Universal magic-link endpoint. Figures out intent from cookie context:
+ *
+ *   - No cookie + email is new      → create owner, send "verify" link  (SIGNUP)
+ *   - No cookie + email exists      → send "login" link to that owner   (LOGIN)
+ *   - Has cookie, owner has no email
+ *     and email is free             → send "verify" link, attaches on click (LINK)
+ *   - Has cookie, email belongs to
+ *     a different owner             → 409 "use Log in instead"
+ *   - Has cookie + email belongs to
+ *     same owner                    → send "verify" link (re-confirmation)
+ *
+ * All success paths return { ok: true, sent: true }. Never reveals whether
+ * an email was already registered (no enumeration leak).
+ */
 export async function POST(req: Request) {
   if (!isSameOriginRequest(req)) {
     return Response.json({ error: "Cross-site requests not allowed." }, { status: 403 });
@@ -39,7 +51,6 @@ export async function POST(req: Request) {
     return Response.json({ error: "That email doesn't look right." }, { status: 400 });
   }
 
-  // Per-email rate limit (defence-in-depth so a single email can't be spammed)
   const emailGate = limit(`auth-email:${email}`, 5, 60 * 60 * 1000);
   if (!emailGate.ok) {
     return Response.json(
@@ -48,41 +59,38 @@ export async function POST(req: Request) {
     );
   }
 
-  let purpose: "login" | "verify" = "login";
-  let ownerIdForLink: string | null = null;
+  const currentOwner = await getCurrentOwner();
+  const existingByEmail = await getOwnerByEmail(email);
 
-  if (body.link) {
-    // Link mode: attach this email to the current cookie owner.
-    const current = await getCurrentOwner();
-    if (!current) {
+  let purpose: "login" | "verify";
+  let ownerIdForLink: string;
+
+  if (currentOwner) {
+    // User has a cookie. Either link or re-verify.
+    if (existingByEmail && existingByEmail.id !== currentOwner.id) {
       return Response.json(
-        { error: "No active owner cookie. Create a waitlist first." },
-        { status: 400 },
-      );
-    }
-    const conflict = await getOwnerByEmail(email);
-    if (conflict && conflict.id !== current.id) {
-      return Response.json(
-        { error: "This email is already linked to another account. Use 'Log in' instead." },
+        {
+          error:
+            "That email belongs to a different account. Log out of this browser first, then log in with that email.",
+        },
         { status: 409 },
       );
     }
     purpose = "verify";
-    ownerIdForLink = current.id;
+    ownerIdForLink = currentOwner.id;
+  } else if (existingByEmail) {
+    // Returning user.
+    purpose = "login";
+    ownerIdForLink = existingByEmail.id;
   } else {
-    // Login mode: find an owner by email. If none, fall through silently —
-    // we still return ok:true so we don't leak which emails are registered.
-    const owner = await getOwnerByEmail(email);
-    ownerIdForLink = owner?.id ?? null;
-  }
-
-  // Even when no owner exists in login mode, we don't reveal that. We just
-  // skip sending the email.
-  if (!body.link && !ownerIdForLink) {
-    return Response.json({ ok: true, sent: false });
+    // Brand-new signup.
+    const fresh = await createOwnerForEmail(email);
+    purpose = "verify";
+    ownerIdForLink = fresh.id;
   }
 
   const token = await createMagicLink({ email, purpose, ownerId: ownerIdForLink });
+
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "https";
