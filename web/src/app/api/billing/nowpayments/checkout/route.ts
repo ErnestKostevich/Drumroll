@@ -34,6 +34,21 @@ export async function POST(req: Request) {
   }
 
   const owner = await getOrCreateOwner();
+
+  // Same email gate as /api/billing/checkout — without it, a direct POST
+  // here bypasses the "Pro is tied to your inbox" guarantee.
+  if (!owner.email || !owner.emailVerifiedAt) {
+    return Response.json(
+      {
+        error: "verify_email",
+        message:
+          "Verify your email before upgrading. Your Pro subscription should be tied to your inbox so it can't be lost if you clear cookies or change browsers.",
+        verifyUrl: "/dashboard/settings",
+      },
+      { status: 403 },
+    );
+  }
+
   const apiKey = process.env.NOWPAYMENTS_API_KEY;
 
   if (!apiKey) {

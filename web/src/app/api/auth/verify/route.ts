@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { consumeMagicLink } from "@/lib/magic-link";
+import { createOwnerForEmail } from "@/lib/auth";
 import { getOwnerByEmail, linkOwnerEmail } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -8,13 +9,13 @@ export const runtime = "nodejs";
 /**
  * GET /api/auth/verify?token=xxx
  *
- * Validates a magic-link token. Two modes:
- *   - purpose=login → looks up owner by email, sets `wk_owner` cookie to it,
- *     redirects to /dashboard.
- *   - purpose=verify → links the email to the link's stored ownerId,
- *     redirects to /dashboard/settings.
+ * Validates a magic-link token. Three click outcomes:
+ *   - purpose=login → look up owner by email, set cookie, redirect.
+ *   - purpose=verify, ownerId set → link email to that owner, set cookie.
+ *   - purpose=verify, ownerId null → create owner now (deferred signup),
+ *     set cookie.
  *
- * Tokens are single-use and expire in 15 minutes.
+ * Single-use, 15-min TTL enforced by `consumeMagicLink`.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -48,20 +49,41 @@ export async function GET(req: Request) {
         { status: 404 },
       );
     }
-    // First-time successful login also doubles as email verification.
+    // First successful inbox roundtrip = verification.
     if (!owner.emailVerifiedAt) {
       await linkOwnerEmail(owner.id, record.email);
     }
     store.set("wk_owner", owner.id, cookieOptions);
     redirect("/dashboard?recovered=1");
-  } else {
-    // verify mode: ownerId is whatever owner requested the link
-    if (!record.ownerId) {
+  }
+
+  // purpose === "verify"
+  if (record.ownerId === null) {
+    // Deferred signup — first click also creates the owner.
+    let owner = await getOwnerByEmail(record.email);
+    if (!owner) {
+      try {
+        owner = await createOwnerForEmail(record.email);
+      } catch {
+        // Race: another verify click for the same email already created
+        // the owner. Just re-fetch and proceed.
+        owner = await getOwnerByEmail(record.email);
+      }
+    }
+    if (!owner) {
       return Response.json(
-        { error: "Verification link missing owner reference." },
-        { status: 400 },
+        { error: "Couldn't create your account. Try again." },
+        { status: 500 },
       );
     }
+    // Mark verified now if it wasn't already.
+    if (!owner.emailVerifiedAt) {
+      await linkOwnerEmail(owner.id, record.email);
+    }
+    store.set("wk_owner", owner.id, cookieOptions);
+    redirect("/dashboard?welcome=1");
+  } else {
+    // Link mode — bind email to the already-existing owner.
     const result = await linkOwnerEmail(record.ownerId, record.email);
     if (!result.ok) {
       return Response.json(

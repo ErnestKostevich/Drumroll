@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { createOwnerForEmail, getCurrentOwner } from "@/lib/auth";
+import { getCurrentOwner } from "@/lib/auth";
 import { getOwnerByEmail } from "@/lib/store";
 import { createMagicLink, buildMagicUrl } from "@/lib/magic-link";
 import { magicLinkEmail, sendSystemEmail } from "@/lib/system-email";
@@ -11,19 +11,19 @@ export const runtime = "nodejs";
 type Body = { email?: string };
 
 /**
- * Universal magic-link endpoint. Figures out intent from cookie context:
+ * Universal magic-link endpoint. Figures out intent from cookie context.
  *
- *   - No cookie + email is new      → create owner, send "verify" link  (SIGNUP)
- *   - No cookie + email exists      → send "login" link to that owner   (LOGIN)
- *   - Has cookie, owner has no email
- *     and email is free             → send "verify" link, attaches on click (LINK)
- *   - Has cookie, email belongs to
- *     a different owner             → 409 "use Log in instead"
+ *   - No cookie + email is new      → "verify" link, ownerId=null  (deferred SIGNUP — owner is created when the link is clicked)
+ *   - No cookie + email exists      → "login" link to that owner   (LOGIN)
+ *   - Has cookie + email is free    → "verify" link, attaches on click (LINK)
  *   - Has cookie + email belongs to
- *     same owner                    → send "verify" link (re-confirmation)
+ *     a different owner             → ok:true returned anyway to avoid
+ *                                     enumeration; nothing is sent
+ *   - Has cookie + same email       → "verify" re-confirmation link
  *
- * All success paths return { ok: true, sent: true }. Never reveals whether
- * an email was already registered (no enumeration leak).
+ * Owners are NEVER created at request time — only at verify time, after the
+ * user proves they own the inbox. This prevents an attacker with rotating
+ * IPs from flooding the `owners` table with empty rows.
  */
 export async function POST(req: Request) {
   if (!isSameOriginRequest(req)) {
@@ -62,31 +62,27 @@ export async function POST(req: Request) {
   const currentOwner = await getCurrentOwner();
   const existingByEmail = await getOwnerByEmail(email);
 
+  // Decide purpose + the ownerId we'll write into the magic_link row.
+  // ownerId may be null for the signup path — verify will create the owner.
   let purpose: "login" | "verify";
-  let ownerIdForLink: string;
+  let ownerIdForLink: string | null;
 
   if (currentOwner) {
-    // User has a cookie. Either link or re-verify.
     if (existingByEmail && existingByEmail.id !== currentOwner.id) {
-      return Response.json(
-        {
-          error:
-            "That email belongs to a different account. Log out of this browser first, then log in with that email.",
-        },
-        { status: 409 },
-      );
+      // Don't 409 — that leaks "this email is registered". Just no-op the
+      // send so the response shape matches every other path. The user will
+      // get no email; if they retry from a logged-out tab the LOGIN path
+      // takes over.
+      return Response.json({ ok: true, sent: true });
     }
     purpose = "verify";
     ownerIdForLink = currentOwner.id;
   } else if (existingByEmail) {
-    // Returning user.
     purpose = "login";
     ownerIdForLink = existingByEmail.id;
   } else {
-    // Brand-new signup.
-    const fresh = await createOwnerForEmail(email);
     purpose = "verify";
-    ownerIdForLink = fresh.id;
+    ownerIdForLink = null; // deferred signup
   }
 
   const token = await createMagicLink({ email, purpose, ownerId: ownerIdForLink });
@@ -102,8 +98,12 @@ export async function POST(req: Request) {
   const { subject, html } = magicLinkEmail({ link: url, purpose });
   const result = await sendSystemEmail({ to: email, subject, html });
   if (!result.ok) {
+    // Log the upstream error server-side; never echo it to the client. The
+    // raw Resend error sometimes contains the account-owner's email or
+    // domain hints — info disclosure.
+    console.error("[wk/auth] system email send failed:", result.error);
     return Response.json(
-      { error: `Couldn't send email: ${result.error}` },
+      { error: "Couldn't send the email right now. Try again in a minute." },
       { status: 502 },
     );
   }
