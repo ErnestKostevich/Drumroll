@@ -55,7 +55,8 @@ export function MobileMenu() {
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
-          className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-xl"
+          className="fixed inset-0 z-[60] flex flex-col"
+          style={{ backgroundColor: "#07090c" }}
         >
           <div className="flex h-14 items-center justify-between border-b border-border/60 px-6">
             <span className="font-mono text-sm font-medium tracking-tight text-foreground">
